@@ -32,11 +32,18 @@ function bg_currentDate($shift=0) {
 	Функция вычисляет дату по заданному правилу для текущего года
 	
 	Параметры:
+		$year - год в формате YYYY
+	
 		$rules - правила в формате
 		
 		дни_недели:интервал_дат
 		
 		Если правило одно, оно может быть задано как строка, иначе это массив строк.
+		
+		В качестве правила может быть задано имя встроенной функции 
+		(например, "afterfeastCandlemas" или "feastendCandlemas"), 
+		которой в качестве параметра передается $year
+		и которая возвращает интервал в указанном здесь формате.
 		
 		** Формат интервалов дат **
 		Интервал дат задаётся по Юлианскому календарю в формате m1-d1,m2-d2
@@ -70,8 +77,10 @@ function bg_get_date_by_rule ($rules, $year) {
 
 	$rules_array = array();
 	$dates_array = array();
-	if (!is_array($rules)) $rules_array[0] = $rules;
-	else $rules_array = $rules;
+	if (!is_array($rules)) {
+		if (function_exists($rules)) $rules_array[0] = $rules($year);
+		else $rules_array[0] = $rules;
+	} else $rules_array = $rules;
 	foreach ($rules_array as $rule) {
 		// Разбираем правило на дни недели и интервлы дат
 		$rule_array = explode(':', $rule, 2);
@@ -246,3 +255,59 @@ function bg_getTone($date) {
 	return $tone;
 }
 
+// Функция возвращает диапазон дат попразднства Сретения
+function afterfeastCandlemas ($year) {
+	
+	$date = bg_get_new_date ('02-02', $year);
+	$dd = -bg_date_easter_dif($date, $year);
+	
+	$afterfeast = [
+		'64' => '02-03,02-07',
+		'63' => '02-03,02-06',
+		'62' => '02-03,02-05',
+		'61' => '02-03,02-04',
+		'60' => '02-03,02-04;02-06,02-07',
+		'59' => '02-03;02-05,02-06',
+		'58' => '02-04,02-05',
+		'57' => '02-03,02-04',
+		'56' => '02-03,02-04',
+		'55' => '02-03',
+		'54' => '02-04',
+		'53' => '02-03',
+		'52' => '02-04',
+		'51' => '02-03'
+	];
+	
+	if ($dd > 64) return '02-03,02-08';
+	elseif ($dd < 51) return '';
+	else return $afterfeast[$dd];
+}
+
+// Функция возвращает дату отдания Сретения
+function feastendCandlemas ($year) {
+	
+	$date = bg_get_new_date ('02-02', $year);
+	$dd = -bg_date_easter_dif($date, $year);
+	$feastend = [
+		'64' => '02-08',
+		'63' => '02-07',
+		'62' => '02-06',
+		'61' => '02-05',
+		'60' => '02-08',
+		'59' => '02-07',
+		'58' => '02-06',
+		'57' => '02-05',
+		'56' => '02-06',
+		'55' => '02-05',
+		'54' => '02-06',
+		'53' => '02-05',
+		'52' => '02-05',
+		'51' => '02-04',
+		'50' => '02-03',
+		'49' => '02-03'
+	];
+	
+	if ($dd > 64) return '02-09';
+	elseif ($dd < 49) return '';
+	else return $feastend[$dd];
+}

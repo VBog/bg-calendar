@@ -16,13 +16,13 @@ include_once ('sedmica.php');
 function bg_getData($year) {
 	
 	$filename = 'data/'.$year.'.json';
-
+/*
 	if (file_exists($filename)) {
 		$json = file_get_contents($filename);
 		$data = json_decode($json, true);
 		return $data;
 	}	
-
+*/
 	$json = file_get_contents('calendar.json');
 	$events = json_decode($json, true);
 	
