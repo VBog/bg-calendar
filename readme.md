@@ -23,7 +23,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 	
 **Структура данных события календаря**
 
-Array
+`Array
 (
     [events] => Array
         (
@@ -100,6 +100,6 @@ Array
 			[hour9] => *ссылка на чтения на 9-м Часе*
 			[evening] => *ссылка на чтения на Вечерне*
 		)
-)
+)`
 
 
