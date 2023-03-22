@@ -16,13 +16,13 @@ include_once ('sedmica.php');
 function bg_getData($year) {
 	
 	$filename = 'data/'.$year.'.json';
-/*
+
 	if (file_exists($filename)) {
 		$json = file_get_contents($filename);
 		$data = json_decode($json, true);
 		return $data;
 	}	
-*/
+
 	$json = file_get_contents('calendar.json');
 	$events = json_decode($json, true);
 	
@@ -36,9 +36,9 @@ function bg_getData($year) {
 		if (!empty($dates)) {
 			foreach ($dates as $date) {
 				// В период триодей чтения только на полиейные праздники
-//				if (in_array($date, $triod_period) && $event['level'] > 3 && $event['level'] != 8) {
-//					$event['readings'] = array();
-//				}
+				if (in_array($date, $triod_period) && $event['level'] > 3 && $event['level'] != 8) {
+					$event['readings'] = array();
+				}
 				$data[$date]['events'][] = $event;
 			}
 		}
@@ -188,7 +188,7 @@ function bg_getData($year) {
 	}
 
 	$json = json_encode($data, JSON_UNESCAPED_UNICODE);
-//	file_put_contents($filename, $json);
+	file_put_contents($filename, $json);
 	
 	return $data;
 }
