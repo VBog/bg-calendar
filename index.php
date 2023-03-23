@@ -13,6 +13,7 @@
 <?php
 include_once ('functions.php');
 include_once ('readings.php');
+include_once ('tropary_days.php');
 
 /***
 	Исполняемый код
@@ -26,6 +27,7 @@ $date = bg_currentDate();
 list($y, $m, $d) = explode('-', $date);
 $y = (int)$y; 
 $wd = date("N",strtotime($date));
+$tone = bg_getTone($date);
 
 $dd = ($y-$y%100)/100 - ($y-$y%400)/400 - 2;
 $old = date("Y-m-d",strtotime ($date.' - '.$dd.' days')) ;
@@ -101,6 +103,9 @@ for ($i=1; $i<6; $i++) {
 ?>
 		<hr>
 		<h3>Тропари, кондаки, молитвы и величания</h3>
+		<details><summary>Тропари и кондаки дня</summary>
+			<?php echo tropary_days ($wd, $tone); ?>
+		</details>
 <?php
 	foreach ($data[$date]['events'] as $event) {
 		if (!empty($event['taks']) && !empty($event['taks'][0])) {
