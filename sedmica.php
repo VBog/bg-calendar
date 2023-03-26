@@ -73,130 +73,174 @@ function bg_sedmica ($date) {
 *******************************************************************************/  
 function bg_getFood ($date) {
 	
+	$fastType = [
+		"Пост",							// 0
+		"Великий пост",					// 1
+		"Апостольский пост",			// 2
+		"Успенский пост",				// 3
+		"Рождественский пост",			// 4
+		
+	];
+
 	$foodKind = [
-		"Поста нет",								// 0
-		"Из трапезы исключается мясо",				// 1
-		"Пост. Разрешается рыба",					// 2
-		"Пост. Разрешается рыбная икра",			// 3
-		"Пост. Пища с растительным маслом",			// 4
-		"Пост. Горячая пища без масла",				// 5
-		"Пост. Сухоядение",							// 6
-		"Пост. Воздержание от пищи"					// 7
+		"Поста нет",					// 0
+		"Из трапезы исключается мясо",	// 1
+		"Разрешается рыба",				// 2
+		"Разрешается рыбная икра",		// 3
+		"Пища с растительным маслом",	// 4
+		"Горячая пища без масла",		// 5
+		"Сухоядение",					// 6
+		"Воздержание от пищи"			// 7
 	];
 	list($y, $m, $d) = explode('-', $date);
 	$wd = date("N",strtotime($date));
 	$y = (int) $y;
 	
+	// Святки
 	if ($date < bg_get_new_date ('01-05', $y)) {								// Продолжение Святок
 		return $foodKind[0];
 
+	// Навечерие Богоявления
 	} elseif ($date == bg_get_new_date ('01-05', $y)) {							// Навечерие Богоявления
-		return $foodKind[6];
+		return $fastType[0].'. '.$foodKind[6];
 
-	} elseif ($date == bg_get_new_date ('01-06', $y)) {							// Богоявление
+	// Богоявление
+	} elseif ($date == bg_get_new_date ('01-06', $y)) {
 		return $foodKind[0];
 
-	} elseif ($date < bg_get_new_date ('0--69', $y)) {							// Зимний мясоед
-		if ($wd == 3 || $wd == 5) return $foodKind[2];
+	// Зимний мясоед
+	} elseif ($date < bg_get_new_date ('0--69', $y)) {
+		if ($wd == 3 || $wd == 5) return $fastType[0].'. '.$foodKind[2];
 		else return $foodKind[0];
 
-	} elseif ($date < bg_get_new_date ('0--62', $y)) {							// Мытаря и фарисея
+	// Седмица о мытаре и фарисее
+	} elseif ($date < bg_get_new_date ('0--62', $y)) {
 		return $foodKind[0];
 
-	} elseif ($date < bg_get_new_date ('0--55', $y)) {							// Зимний мясоед (Блудного сына)
-		if ($wd == 3 || $wd == 5) return $foodKind[2];
+	// Седмица о блудном сыне. Зимний мясоед
+	} elseif ($date < bg_get_new_date ('0--55', $y)) {
+		if ($wd == 3 || $wd == 5) return $fastType[0].'. '.$foodKind[2];
 		else return $foodKind[0];
 
-	} elseif ($date < bg_get_new_date ('0--48', $y)) {							// Сырная седмицы
+	// Сырная седмица
+	} elseif ($date < bg_get_new_date ('0--48', $y)) {
 		return $foodKind[1];
 
-	} elseif ($date == bg_get_new_date ('0--48', $y)) {							// Первый день Великого поста
-		return $foodKind[7];
+	// Первый день Великого поста
+	} elseif ($date == bg_get_new_date ('0--48', $y)) {
+		return $fastType[1].'. '.$foodKind[7];
 
-	} elseif ($date < bg_get_new_date ('0--8', $y)) {							// Великий пост
-		if ($date == bg_get_new_date ('03-25', $y)) return $foodKind[2];		// Благовещение
-		if ($wd == 1 || $wd == 3 || $wd == 5) return $foodKind[6];
-		elseif ($wd == 2 || $wd == 4) return $foodKind[5];
-		else return $foodKind[4];
+	// Великий пост
+	} elseif ($date < bg_get_new_date ('0--8', $y)) {
+		// Благовещение
+		if ($date == bg_get_new_date ('03-25', $y)) return $fastType[1].'. '.$foodKind[2];
+		if ($wd == 1 || $wd == 3 || $wd == 5) return $fastType[1].'. '.$foodKind[6];
+		elseif ($wd == 2 || $wd == 4) return $fastType[1].'. '.$foodKind[5];
+		else return $fastType[1].'. '.$foodKind[4];
 
-	} elseif ($date == bg_get_new_date ('0--8', $y)) {							// Лазарева Суббота
-		if ($date == bg_get_new_date ('03-25', $y)) return $foodKind[2];
-		return $foodKind[3];
+	// Лазарева Суббота
+	} elseif ($date == bg_get_new_date ('0--8', $y)) {
+		if ($date == bg_get_new_date ('03-25', $y)) return $fastType[1].'. '.$foodKind[2];
+		return $fastType[1].'. '.$foodKind[3];
 
-	} elseif ($date == bg_get_new_date ('0--7', $y)) {							// Вход Господень в Иерусалим
-		return $foodKind[2];
+	// Вход Господень в Иерусалим
+	} elseif ($date == bg_get_new_date ('0--7', $y)) {
+		return $fastType[1].'. '.$foodKind[2];
 
-	} elseif ($date < bg_get_new_date ('0-0', $y)) {							// Страстная седмица
-		if ($wd == 5) return $foodKind[7];
-		elseif ($wd == 6) return $foodKind[5];
-		else return $foodKind[6];
+	// Страстная седмица
+	} elseif ($date < bg_get_new_date ('0-0', $y)) {
+		if ($wd == 5) return $fastType[1].'. '.$foodKind[7];
+		elseif ($wd == 6) return $fastType[1].'. '.$foodKind[5];
+		else return $fastType[1].'. '.$foodKind[6];
 
-	} elseif ($date < bg_get_new_date ('0-6', $y)) {							// Светлая седмицы
+	// Светлая седмицы
+	} elseif ($date < bg_get_new_date ('0-6', $y)) {
 		return $foodKind[0];
 
-	} elseif ($date <= bg_get_new_date ('0-49', $y)) {							// Весенний мясоед
-		if ($wd == 3 || $wd == 5) return $foodKind[2];
+	// Весенний мясоед
+	} elseif ($date <= bg_get_new_date ('0-49', $y)) {
+		if ($wd == 3 || $wd == 5) return $fastType[0].'. '.$foodKind[2];
 		else return $foodKind[0];
 
-	} elseif ($date <= bg_get_new_date ('0-56', $y)) {							// Троицкая седмицы
+	// Троицкая седмицы
+	} elseif ($date <= bg_get_new_date ('0-56', $y)) {
 		return $foodKind[0];
 
-	} elseif ($date < bg_get_new_date ('06-29', $y)) {							// Апостольский пост
-		if ($date == bg_get_new_date ('06-24', $y)) return $foodKind[2];		// Рождество Иоанна Предтечи
-		if ($wd == 1) return $foodKind[5];
-		elseif ($wd == 3 || $wd == 5) return $foodKind[6];
-		else return $foodKind[2];
-
-	} elseif ($date == bg_get_new_date ('06-29', $y)) {							// Петра и Павла
-		if ($wd == 3 || $wd == 5) return $foodKind[2];
+	// Апостольский пост
+	} elseif ($date < bg_get_new_date ('06-29', $y)) {
+		// Рождество Иоанна Предтечи
+		if ($date == bg_get_new_date ('06-24', $y)) return $fastType[2].'. '.$foodKind[2];
+		if ($wd == 1) return $fastType[2].'. '.$foodKind[5];
+		elseif ($wd == 3 || $wd == 5) return $fastType[2].'. '.$foodKind[6];
+		else return $fastType[2].'. '.$foodKind[2];
+	
+	// Петра и Павла
+	} elseif ($date == bg_get_new_date ('06-29', $y)) {
+		if ($wd == 3 || $wd == 5) return $fastType[0].'. '.$foodKind[2];
+		else return $foodKind[0];
+	
+	// Летний мясоед
+	} elseif ($date <  bg_get_new_date ('08-01', $y)) {
+		if ($wd == 3 || $wd == 5) return $fastType[0].'. '.$foodKind[4];
 		else return $foodKind[0];
 
-	} elseif ($date <  bg_get_new_date ('08-01', $y)) {							// Летний мясоед
-		if ($wd == 3 || $wd == 5) return $foodKind[4];
+	// Успенский пост
+	} elseif ($date < bg_get_new_date ('08-15', $y)) {
+		// Преображение
+		if ($date == bg_get_new_date ('08-06', $y)) return $fastType[3].'. '.$foodKind[2];		
+		if ($wd == 1 || $wd == 3 || $wd == 5) return $fastType[3].'. '.$foodKind[6];
+		elseif ($wd == 2 || $wd == 4) return $fastType[3].'. '.$foodKind[5];
+		else return $fastType[3].'. '.$foodKind[4];
+
+	// Успение
+	} elseif ($date == bg_get_new_date ('08-15', $y)) {
+		if ($wd == 3 || $wd == 5) return $fastType[0].'. '.$foodKind[2];
 		else return $foodKind[0];
 
-	} elseif ($date < bg_get_new_date ('08-15', $y)) {							// Успенский пост
-		if ($date == bg_get_new_date ('08-06', $y)) return $foodKind[2];		// Преображение
-		if ($wd == 1 || $wd == 3 || $wd == 5) return $foodKind[6];
-		elseif ($wd == 2 || $wd == 4) return $foodKind[5];
-		else return $foodKind[4];
-
-	} elseif ($date == bg_get_new_date ('08-15', $y)) {							// Успение
-		if ($wd == 3 || $wd == 5) return $foodKind[2];
-		else return $foodKind[0];
-
-	} elseif ($date <  bg_get_new_date ('11-15', $y)) {							// Осенний мясоед
-		if ($date == bg_get_new_date ('08-29', $y)) return $foodKind[4];		// Усекновение головы Иоанна Предтечи
-		if ($date == bg_get_new_date ('09-14', $y)) return $foodKind[4];		// Воздвижение
+	// Осенний мясоед
+	} elseif ($date <  bg_get_new_date ('11-15', $y)) {
+		// Усекновение головы Иоанна Предтечи
+		if ($date == bg_get_new_date ('08-29', $y)) return $fastType[0].'. '.$foodKind[4];
+		// Воздвижение
+		if ($date == bg_get_new_date ('09-14', $y)) return $fastType[0].'. '.$foodKind[4];
 		if ($wd == 3 || $wd == 5){
-			if ($date == bg_get_new_date ('09-08', $y)) return $foodKind[2];	// Рождество Богородицы
-			elseif ($date == bg_get_new_date ('10-01', $y)) return $foodKind[2];// Покров
-			else return $foodKind[4];
+			// Рождество Богородицы
+			if ($date == bg_get_new_date ('09-08', $y)) return $fastType[0].'. '.$foodKind[2];
+			// Покров
+			elseif ($date == bg_get_new_date ('10-01', $y)) return $foodKind[2];
+			else return $fastType[0].'. '.$foodKind[4];
 		} 
 		else return $foodKind[0];
 
-	} elseif ($date < bg_get_new_date ('12-06', $y)) {							// Рождественский пост
-		if ($date == bg_get_new_date ('11-21', $y)) return $foodKind[2];		// Введение
+	// Рождественский пост
+	} elseif ($date < bg_get_new_date ('12-06', $y)) {
+		// Введение
+		if ($date == bg_get_new_date ('11-21', $y)) return $fastType[4].'. '.$foodKind[2];
+		if ($wd == 1) return $fastType[4].'. '.$foodKind[5];
+		elseif ($wd == 3 || $wd == 5) return $fastType[4].'. '.$foodKind[6];
+		else return $fastType[4].'. '.$foodKind[2];
+
+	// Св. Николая 
+	} elseif ($date == bg_get_new_date ('12-06', $y)) {
+		return $fastType[4].'. '.$foodKind[2];
+
+	// Рождественский пост (продолжение)
+	} elseif ($date < bg_get_new_date ('12-20', $y)) {
 		if ($wd == 1) return $foodKind[5];
-		elseif ($wd == 3 || $wd == 5) return $foodKind[6];
+		elseif ($wd == 3 || $wd == 5) return $fastType[4].'. '.$foodKind[6];
+		elseif ($wd == 2 || $wd == 4) return $fastType[4].'. '.$foodKind[4];
 		else return $foodKind[2];
 
-	} elseif ($date == bg_get_new_date ('12-06', $y)) {							// Св. Николая 
-		return $foodKind[2];
+	// Рождественский пост (окончание)
+	} elseif ($date < bg_get_new_date ('12-24', $y)) {
+		if ($wd == 1 || $wd == 3 || $wd == 5) return $fastType[4].'. '.$foodKind[6];
+		elseif ($wd == 2 || $wd == 4) return $fastType[4].'. '.$foodKind[5];
+		else return $fastType[4].'. '.$foodKind[4];
 
-	} elseif ($date < bg_get_new_date ('12-20', $y)) {							// Рождественский пост (продолжение)
-		if ($wd == 1) return $foodKind[5];
-		elseif ($wd == 3 || $wd == 5) return $foodKind[6];
-		elseif ($wd == 2 || $wd == 4) return $foodKind[4];
-		else return $foodKind[2];
+	// Рождественский сочельник
+	} elseif ($date == bg_get_new_date ('12-24', $y)) {
+		return $fastType[4].'. '.$foodKind[6];
 
-	} elseif ($date < bg_get_new_date ('12-24', $y)) {							// Рождественский пост (окончание)
-		if ($wd == 1 || $wd == 3 || $wd == 5) return $foodKind[6];
-		elseif ($wd == 2 || $wd == 4) return $foodKind[5];
-		else return $foodKind[4];
-
-	} elseif ($date == bg_get_new_date ('12-24', $y)) {							// Рождественский сочельник
-		return $foodKind[6];
-
-	} else return $foodKind[0];													// Святки
+	// Святки
+	} else return $foodKind[0];
 }

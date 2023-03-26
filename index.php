@@ -28,6 +28,7 @@ list($y, $m, $d) = explode('-', $date);
 $y = (int)$y; 
 $wd = date("N",strtotime($date));
 $tone = bg_getTone($date);
+$easter = bg_get_easter($y);
 
 $dd = ($y-$y%100)/100 - ($y-$y%400)/400 - 2;
 $old = date("Y-m-d",strtotime ($date.' - '.$dd.' days')) ;
@@ -103,10 +104,28 @@ for ($i=1; $i<6; $i++) {
 ?>
 		<hr>
 		<h3>Тропари, кондаки, молитвы и величания</h3>
-		<details><summary>Тропари и кондаки дня</summary>
-			<?php echo tropary_days ($wd, $tone); ?>
-		</details>
-<?php
+<?php 
+	// Тропари и кондаки дня
+	if ($date < bg_get_easter($y, -6) || $date > bg_get_easter($y, 6)) { 
+		echo '<details><summary>Тропари и кондаки дня</summary>';
+		echo tropary_days ($wd, $tone);
+		echo '</details>';
+	}
+	// Пасхи на Светлой седмицы
+	if ($date > bg_get_easter($y, 0) && $date < bg_get_easter($y, 7)) {
+		$event = $data[$easter]['events'][0];
+		if (!empty($event['taks']) && !empty($event['taks'][0])) {
+			$title = $event['taks'][0]['title'];
+			$title = count(explode(' ',$title,2))>1?explode(' ',$title,2)[1]:'';
+			echo '<details><summary>'.$title.'</summary>'.PHP_EOL;
+			foreach ($event['taks'] as $tak) {
+				echo '<h4>'.$tak['title'].($tak['voice']?(', глас '.$tak['voice']):'').'</h4>'.PHP_EOL;
+				echo '<p>'.$tak['text'].'</p>'.PHP_EOL;
+			}
+			echo '</details>'.PHP_EOL;
+		}
+	} 
+	// Праздники
 	foreach ($data[$date]['events'] as $event) {
 		if (!empty($event['taks']) && !empty($event['taks'][0])) {
 			$title = $event['taks'][0]['title'];
