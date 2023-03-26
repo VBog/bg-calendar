@@ -28,6 +28,8 @@ function bg_getData($year) {
 	
 	// Период триодей в текущем году
 	$triod_period = bg_get_date_by_rule ('0--56,0-50;0-56;', $year);
+	// Светлая седмица и Вселенские родительские субботы
+	$easterweek = bg_get_date_by_rule ('0--57;0-0,0-6;0-48', $year);
 
 	$data = array();
 	// Формируем массив по дням года
@@ -35,8 +37,13 @@ function bg_getData($year) {
 		$dates = bg_get_date_by_rule ($event['rule'], $year);
 		if (!empty($dates)) {
 			foreach ($dates as $date) {
+				
+				// На Светлой седмице и в Вселенские родительские субботы нет праздников святых
+				if (in_array($date, $easterweek) && $event['level'] > 1 && $event['level'] != 8) {
+					$event['readings'] = array();
+
 				// В период триодей чтения только на полиейные праздники
-				if (in_array($date, $triod_period) && $event['level'] > 3 && $event['level'] != 8) {
+				} elseif (in_array($date, $triod_period) && $event['level'] > 3 && $event['level'] != 8) {
 					$event['readings'] = array();
 				}
 				$data[$date]['events'][] = $event;
