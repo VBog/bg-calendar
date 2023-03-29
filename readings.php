@@ -130,6 +130,13 @@ function bg_getData($year) {
 		list($y, $m, $d) = explode('-', $date);
 		$wd = date("N",strtotime($date));
 		
+		$tomorrow = date ('Y-m-d', strtotime($date.'+ 1 days'));
+		$wd_t = date("N",strtotime($tomorrow));
+		$yesterday = date ('Y-m-d', strtotime($date.'- 1 days'));
+		$wd_y = date("N",strtotime($yesterday));
+		$before_yesterday = date ('Y-m-d', strtotime($date.'- 2 days'));
+		$wd_by = date("N",strtotime($before_yesterday));
+		
 		$or = new OrderedReadings();
 		
 		if ($date < bg_get_new_date ('0--48', $y) || bg_get_new_date ('0-0', $y) < $date ) { // Не Великим постом
@@ -142,12 +149,6 @@ function bg_getData($year) {
 			// Проверяем переносы рядовых чтений на сегодня
 				$wd_name = ['за понедельник','за вторник','за среду','за четверг','за пятницу','за субботу','за Неделю'];
 
-				$tomorrow = date ('Y-m-d', strtotime($date.'+ 1 days'));
-				$wd_t = date("N",strtotime($tomorrow));
-				$yesterday = date ('Y-m-d', strtotime($date.'- 1 days'));
-				$wd_y = date("N",strtotime($yesterday));
-				$before_yesterday = date ('Y-m-d', strtotime($date.'- 2 days'));
-				$wd_by = date("N",strtotime($before_yesterday));
 				// Вчера Великий или бденный праздник и сегодня вторник
 				// или со вторника по субботу и позавчера Великий или бденный праздник
 				if (!empty($data[$yesterday]) && 																	// Вчера: 
@@ -186,7 +187,6 @@ function bg_getData($year) {
 					(($data[$tomorrow]['main_level'] <= 3 && $data[$tomorrow]['main_feast_type'] == 'our_lord') || 		// Господский,
 						($data[$tomorrow]['main_level'] <= 2 && $wd_t < 7) ||											// или Великий и Бденный в будни
 						$data[$tomorrow]['main_type'] == 'eve') ) {														// или Навечерие
-				
 				$readings[] = (array) $or->bg_day_readings ($date, 'Ряд.');					
 			}
 		} else $readings[] = (array) $or->bg_day_readings ($date, '');
