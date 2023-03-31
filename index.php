@@ -79,8 +79,8 @@ for ($i=1; $i<6; $i++) {
 // Список чтений дня
 	// Праздники
 	foreach ($data[$date]['events'] as $event) {
-		if ($data[$date]['day_subtype'] != 'universal_saturday') {
-			if ($wd == 6 || ($event['priority'] && $event['level'] < 3 && $wd < 7)) { // Суббота или Бдение и выше
+		if (!in_array($data[$date]['day_subtype'], ['universal_saturday', 'eve'])) {
+			if ($wd == 6 || (is_numeric($event['priority']) && $event['level'] < 3 && $wd < 7)) { // Суббота или Бдение и выше
 				bg_printReadings ($event['readings']);
 			}
 		}
@@ -91,12 +91,12 @@ for ($i=1; $i<6; $i++) {
 	}
 	// Праздники
 	foreach ($data[$date]['events'] as $event) {
-		if ($data[$date]['day_subtype'] != 'universal_saturday') {
-			if ($wd != 6 && $event['priority'] && !($event['level'] < 3 && $wd < 7)) { // Не суббота и Полиелей и ниже
+		if (!in_array($data[$date]['day_subtype'], ['universal_saturday', 'eve'])) {
+			if ($wd != 6 && is_numeric($event['priority']) && !($event['level'] < 3 && $wd < 7)) { // Не суббота и Полиелей и ниже
 				bg_printReadings ($event['readings']);
 			}
 		} else {
-			if ($event['subtype'] == 'universal_saturday') { 
+			if (in_array($event['subtype'], ['universal_saturday', 'eve'])) {
 				bg_printReadings ($event['readings']);
 			}
 		}
