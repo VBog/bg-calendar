@@ -76,6 +76,9 @@ for ($i=1; $i<6; $i++) {
 		<div style="text-align:left;">
 <?php
 
+// Тип литургии
+	echo '<p>'.$data[$date]['liturgy'].'</p>';
+
 // Список чтений дня
 	// Праздники
 	foreach ($data[$date]['events'] as $event) {

@@ -77,6 +77,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 				)
 				
 			***Параметры дня***
+			[afterfeast] => *Попразднство*
 			[day_type] => *Тип дня*
 			[day_subtype] => *Подтип дня*
 			[main_level] => *Уровень значимости главного события*
@@ -85,6 +86,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 			[main_feast_type] => *Тип праздника главного события*
 			[icon] => *Икона дня (ссылка)*
 			[icon_title] => *Название иконы дня*
+			[liturgy] => *Тип литургии*
 			[sedmica] => *Наименование седмицы/Недели*
 			[tone] => *Глас Октоиха*
 			[food] => *Разрешенная пища*	

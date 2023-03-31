@@ -139,6 +139,12 @@ function bg_getData($year) {
 			}
 		}
 		
+		// Тип литургии
+		if (is_ioann_zlatoust ($date)) $liturgy = 'Литургия свт. Иоанна Златоуста.';
+		elseif (is_vasiliy_velikiy($date)) $liturgy = 'Литургия свт. Василия Великого.';
+		elseif (is_grigoriy_dvoeslov ($date, $main_level <= 3)) $liturgy = 'Литургия Преждеосвященных Даров.';
+		else $liturgy = 'Нет литургии.';
+
 		// Добавляем в БД основные параметры дня
 		$data[$date]['afterfeast'] = $afterfeast;			// Попразднство
 		$data[$date]['day_type'] = $day_type;				// Тип особого дня
@@ -150,6 +156,7 @@ function bg_getData($year) {
 		$data[$date]['icon'] = $icon;						// Икона дня
 		$data[$date]['icon_title'] = $icon_title;			// Название иконы дня
 	
+		$data[$date]['liturgy'] = $liturgy;					// Тип литургии
 		$data[$date]['sedmica'] = bg_sedmica ($date);		// Название седмицы/Недели
 		$data[$date]['tone'] = bg_getTone ($date);			// Глас Октоиха
 		$data[$date]['food'] = bg_getFood ($date);			// Рекомендации пищи
@@ -235,3 +242,56 @@ function bg_getData($year) {
 	
 	return $data;
 }
+/*******************************************************************************
+
+	Функция определяет совершается ли в этот день Литургия Василия Великого
+
+*******************************************************************************/  
+function is_vasiliy_velikiy($date) {
+	
+	list ($year, $m, $d) = explode ('-', $date);
+								
+	$date_array = array_merge (	bg_get_date_by_rule ('01-01', $year),							// день памяти Василия Великого 1 (14) января;
+								bg_get_date_by_rule ('0--42;0--35;0--28;0--21;0--14', $year),	// 1, 2, 3, 4 и 5-е воскресенье Великого поста;
+								bg_get_date_by_rule ('0--3;0--1', $year),						// Великий четверг и Великая суббота на Страстной седмице.
+								bg_get_date_by_rule ('1,2,3,4,5:12-24;01-05', $year),			// навечерия праздников Рождества Христова и Крещения 
+								bg_get_date_by_rule ('7,1:12-25;01-06', $year) );				// или в самый день этих праздников, 
+																								// если их навечерия выпадают в субботу или воскресенье
+	
+	if (in_array($date, $date_array))  return true;
+	else return false;
+}
+/*******************************************************************************
+
+	Функция определяет совершается ли в этот день Литургия Преждеосвященных Даров
+
+*******************************************************************************/  
+function is_grigoriy_dvoeslov ($date, $polyeles=false) {
+	
+	list ($year, $m, $d) = explode ('-', $date);
+	
+	$date_array = array_merge (	bg_get_date_by_rule('3,5:0--48,0--9', $year),	// Ср и Пт Четыредесятницы
+								bg_get_date_by_rule('0--6,0--4', $year) );		// с Пн по Ср Страстной седмицы
+	
+	if (in_array($date, bg_get_date_by_rule('03-25', $year)))  return false;							// Благовещение 
+	elseif (in_array($date, $date_array)) return true;													// Ср и Пт Четыредесятницы и с Пн по Ср Страстной седмицы
+	elseif ($polyeles && in_array($date, bg_get_date_by_rule('1,2,4:0--48,0--9', $year))) return true;	// Полиелей
+	else return false;
+}
+
+/*******************************************************************************
+
+	Функция определяет совершается ли в этот день Литургия Иоанна Златоуста
+
+*******************************************************************************/  
+function is_ioann_zlatoust ($date) {
+	
+	list ($year, $m, $d) = explode ('-', $date);
+	
+	$date_array = bg_get_date_by_rule('1,2,3,4,5:0--53;0--51;0--48,0--4;0--2', $year);	// Ср и Пт Сырной седмицы и будни Великого поста, 
+																						// кроме Великого Четверга							
+	if (!is_vasiliy_velikiy($date) &&								// НЕ Литургия Василия Великого				
+		(in_array($date, bg_get_date_by_rule('03-25', $year)) || 	// и Благовещение 
+		!in_array($date, $date_array)) ) return true;				// или НЕ Великий Пост
+	else return false;
+}	
