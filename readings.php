@@ -1,6 +1,6 @@
 <?php
 /*
-	Формируем чтения на день
+	Формируем БД на год
 */
 include_once ('bg_ordered_readings.php');
 include_once ('sedmica.php');
@@ -16,13 +16,13 @@ include_once ('sedmica.php');
 function bg_getData($year) {
 	
 	$filename = 'data/'.$year.'.json';
-/*
+
 	if (file_exists($filename)) {
 		$json = file_get_contents($filename);
 		$data = json_decode($json, true);
 		return $data;
 	}	
-*/
+
 	$locale = setlocale(LC_ALL, 0);
 	$calendar_json = './locale/'.$locale.'/DATA/calendar.json';
 	if (!file_exists($calendar_json)) $calendar_json = 'calendar.json';

@@ -69,6 +69,7 @@
 <body>
 <div class="container">
 <?php
+/***
 // Устанавливаем английский язык
 putenv('LC_ALL=en_US');
 setlocale(LC_ALL, 'en_US');
@@ -80,7 +81,7 @@ bindtextdomain("calendar", "./locale");
 textdomain("calendar");
 
 // Теперь поиск переводов будет идти в ./locale/en_US/LC_MESSAGES/calendar.mo
-
+***/
 
 include_once ('functions.php');
 include_once ('readings.php');
