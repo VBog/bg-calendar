@@ -1,26 +1,96 @@
-<!-- Заголовок страницы -->
-<html>
+<!doctype html>
+<html lang="ru">
 <head>
-	<style>
-		input[type="button"],
-		summary {
-			cursor: pointer;
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<title>Православный календарь</title>
+
+<style>
+	body {
+		font-size: large;
+	}
+	input {
+		font-size: medium;
+	}
+	.container {
+		display: block;
+		width: 420px;
+		margin: 0;
+		font-size: 100%;
+	}
+	.day-settings-today {
+		width: 100%; 
+		margin: 0 20px 0 20px;
+		text-align: center;
+		font-size: 100%;
+	}
+	.calendar {
+		width: 100%; 
+		margin: 0 20px 0 20px;
+		text-align: center;
+		font-size: 100%;
+	}
+	.readings {
+		width: 100%; 
+		margin: 0 20px 0 20px;
+		text-align:left;
+		font-size: 100%;
+	}
+	.tropary {
+		width: 100%; 
+		margin: 0 20px 0 20px;
+		text-align:left;
+		font-size: 100%;
+	}
+	@media screen and (max-width: 1200px) {
+		.container {
+			width: 100%;
+			font-size: 200%;
 		}
-	</style>
+	}
+	
+	details {
+		width: 100%;
+	}
+	pre {
+		white-space: pre-wrap;       /* css-3 */
+		white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+		white-space: -pre-wrap;      /* Opera 4-6 */
+		white-space: -o-pre-wrap;    /* Opera 7 */
+		word-wrap: break-word;       /* Internet Explorer 5.5+ */
+	}
+	input[type="button"],
+	summary {
+		cursor: pointer;
+	}
+</style>
 </head>
 <body>
-
+<div class="container">
 <?php
+// Устанавливаем английский язык
+putenv('LC_ALL=en_US');
+setlocale(LC_ALL, 'en_US');
+
+// Указываем путь к таблицам переводов
+bindtextdomain("calendar", "./locale");
+
+// Выбираем домен
+textdomain("calendar");
+
+// Теперь поиск переводов будет идти в ./locale/en_US/LC_MESSAGES/calendar.mo
+
+
 include_once ('functions.php');
 include_once ('readings.php');
-include_once ('tropary_days.php');
 
 /***
 	Исполняемый код
 ***/
 
-$weekday = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','<span>Воскресенье</span>'];
-$monthes = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+$weekday = [_("Понедельник"),_("Вторник"),_("Среда"),_("Четверг"),_("Пятница"),_("Суббота"),_("Воскресенье")];
+$monthes = [_("января"),_("февраля"),_("марта"),_("апреля"),_("мая"),_("июня"),_("июля"),_("августа"),_("сентября"),_("октября"),_("ноября"),_("декабря")];
 
 $date = bg_currentDate();
 
@@ -40,28 +110,40 @@ $data = bg_getData($old_y);
 ?>
 <!-- Выбор даты -->	
 	<div class="day-settings-today">
-		<input id="bg_yesterdayButton" type="button" value="< Вчера">
-		<input id="bg_setDay" class="bg_setDay" type="date" value="<?php echo  $date; ?>" title="Выбрать дату"> 
-		<input id="bg_todayButton" type="button" value="Сегодня">
-		<input id="bg_tommorowButton" type="button" value="Завтра >">
+		<input id="bg_yesterdayButton" type="button" value="< <?php echo _("Вчера"); ?>">
+		<input id="bg_setDay" class="bg_setDay" type="date" value="<?php echo  $date; ?>" title="<?php echo _("Выбрать дату"); ?>"> 
+		<input id="bg_todayButton" type="button" value="<?php echo _("Сегодня"); ?>">
+		<input id="bg_tommorowButton" type="button" value="<?php echo _("Завтра"); ?> >">
 	</div>
 	
-	<details><summary>Данные дня</summary>
+	<details><summary><?php echo _("Данные дня"); ?></summary>
 		<pre>
 			<?php print_r($data[$date]); ?>
 		</pre>
 	</details>
-	<div style="width: 400px; text-align: center;">
-		<hr>	
+	<hr>	
+	<div class="calendar">
+	<!-- Икона дня -->
 		<img height="250" src="https://azbyka.ru/days/storage/images/<?php echo $data[$date]['icon']; ?>" title="<?php echo $data[$date]['icon_title']; ?>" />
-		<h3<?php echo (($wd==7)?' style=" color:red"':""); ?>><?php echo $weekday[$wd-1].',<br>'. (int) $d .' '. $monthes[$m-1] .' '. $y .'г.'; ?><br>
-		<?php echo '('.(int) $old_d .' '. $monthes[$old_m-1] .' ст.ст.)'; ?></h3>
-
+	<!-- Дата по новому стилю -->
+		<h3<?php echo (($wd==7)?' style=" color:red"':""); ?>><?php echo $weekday[$wd-1].',<br>'. sprintf (_('%1$d %2$s %3$d г.'), (int)$d , $monthes[$m-1] , (int)$y); ?><br>
+	<!-- и по старому стилю -->
+		<?php echo '('.sprintf (_('%1$d %2$s ст.ст.'), (int)$old_d, $monthes[$old_m-1]).')'; ?></h3>
+	<!-- Название седмицы/Недели -->
 		<h4<?php echo (($wd==7)?' style=" color:red"':""); ?>><?php echo $data[$date]['sedmica']; ?></h4>
-		<p>Глас <?php echo $data[$date]['tone']; ?>, <?php echo $data[$date]['food']; ?></p>
+	<!-- Глас, пост, пища -->
+		<p><?php echo _("Глас").' '.$data[$date]['tone']; ?>, <?php echo $data[$date]['food']; ?></p>
 	
 <?php
-// Внимание, данные с приоритетом 0 на экран не выводим
+/*******************************************************
+	Выводим названия событий пятью абзацами.
+		1. Есть служба в Минее/Триоди
+		2. Память общих святых
+		3. Память новомучеников
+		4. Почитание икон Богородицы
+		5. Прочие
+********************************************************/
+// Внимание, данные с приоритетом 0 на экран не выводим (только чтения)
 for ($i=1; $i<6; $i++) {
 	$text = '';
 	foreach ($data[$date]['events'] as $event) {
@@ -72,10 +154,13 @@ for ($i=1; $i<6; $i++) {
 	if ($text) echo '<p>'.$text.'</p>';
 }
 ?>
-		<hr>
-		<div style="text-align:left;">
+	</div>
+	<hr>
+	<div class='readings'>
 <?php
-
+/*******************************************************
+	Выводим чтения суточного круга
+********************************************************/
 // Тип литургии
 	echo '<p>'.$data[$date]['liturgy'].'</p>';
 
@@ -105,44 +190,39 @@ for ($i=1; $i<6; $i++) {
 		}
 	}
 ?>
-		<hr>
-		<h3>Тропари, кондаки, молитвы и величания</h3>
+	</div>
+	<hr>
+	<div class='tropary'>
+	<h3><?php echo _("Тропари, кондаки, молитвы и величания"); ?></h3>
 <?php 
+/*******************************************************
+	Выводим тропари, кондаки, молитвы и величания
+********************************************************/
 	// Тропари и кондаки дня
-	if ($date < bg_get_easter($y, -6) || $date > bg_get_easter($y, 6)) { 
-		echo '<details><summary>Тропари и кондаки дня</summary>';
-		echo tropary_days ($wd, $tone);
-		echo '</details>';
-	}
-	// Пасхи на Светлой седмицы
-	if ($date > bg_get_easter($y, 0) && $date < bg_get_easter($y, 7)) {
-		$event = $data[$easter]['events'][0];
-		if (!empty($event['taks']) && !empty($event['taks'][0])) {
-			$title = $event['taks'][0]['title'];
-			$title = count(explode(' ',$title,2))>1?explode(' ',$title,2)[1]:'';
-			echo '<details><summary>'.$title.'</summary>'.PHP_EOL;
-			foreach ($event['taks'] as $tak) {
-				echo '<h4>'.$tak['title'].($tak['voice']?(', глас '.$tak['voice']):'').'</h4>'.PHP_EOL;
-				echo '<p>'.$tak['text'].'</p>'.PHP_EOL;
-			}
-			echo '</details>'.PHP_EOL;
+	$event = bg_tropary_days ($date);
+	if ($date != bg_get_easter($y, 0) && !empty($event['taks']) && !empty($event['taks'][0])) {
+		echo '<details><summary>'._("Тропари и кондаки дня").'</summary>'.PHP_EOL;
+		foreach ($event['taks'] as $tak) {
+			echo '<h4>'.$tak['title'].($tak['voice']?(', '._("глас").' '.$tak['voice']):'').'</h4>'.PHP_EOL;
+			echo '<p>'.$tak['text'].'</p>'.PHP_EOL;
 		}
-	} 
-	// Праздники
+		echo '</details>'.PHP_EOL;
+	}
+ 
+	// Тропари и кондаки событий календаря
 	foreach ($data[$date]['events'] as $event) {
 		if (!empty($event['taks']) && !empty($event['taks'][0])) {
-			$title = $event['taks'][0]['title'];
+			$title = $event['taks'][0]['title'];	// В заголовок выносим название первой записи без первого слова (Тропарь)
 			$title = count(explode(' ',$title,2))>1?explode(' ',$title,2)[1]:'';
 			echo '<details><summary>'.$title.'</summary>'.PHP_EOL;
 			foreach ($event['taks'] as $tak) {
-				echo '<h4>'.$tak['title'].($tak['voice']?(', глас '.$tak['voice']):'').'</h4>'.PHP_EOL;
+				echo '<h4>'.$tak['title'].($tak['voice']?(', '._("глас").' '.$tak['voice']):'').'</h4>'.PHP_EOL;
 				echo '<p>'.$tak['text'].'</p>'.PHP_EOL;
 			}
 			echo '</details>'.PHP_EOL;
 		}
 	}
 ?>		
-		</div>
 	</div>
 <!-- Завершение страницы -->	
 <script>
@@ -183,19 +263,43 @@ for ($i=1; $i<6; $i++) {
 		location.href=url;
 	}
 </script>
-
+</div>
 </body>
 </html>
 <?php
+/*************************************************************************************
+
+	Пользовательская функция выводит ссылки на чтения Св.Писания
+		
+**************************************************************************************/
 function bg_printReadings ($readings) {
 	if (empty($readings)) return;
 	echo '<p>'.($readings['title']?('<i>'.$readings['title'].':</i> '):'').
-		($readings['morning']?('<i>Утр.:</i> '.$readings['morning'].' '):'').
-		($readings['hour1']?('<i>1-й час:</i> '.$readings['hour1'].' '):'').
-		($readings['hour3']?('<i>3-й час:</i> '.$readings['hour3'].' '):'').
-		($readings['hour6']?('<i>6-й час:</i> '.$readings['hour6'].' '):'').
-		($readings['hour9']?('<i>9-й час:</i> '.$readings['hour9'].' '):'').
-		($readings['apostle']?('<i>Лит.: Ап.-</i> '.$readings['apostle'].' '):'').
-		($readings['gospel']?('<i>Ев.-</i> '.$readings['gospel'].' '):'').
-		($readings['evening']?('<i>Веч.:</i> '.$readings['evening'].' '):'').'</p>';
+		($readings['morning']?('<i>'._("Утр.").':</i> '.blink ($readings['morning'],'hlink').' '):'').
+		($readings['hour1']?('<i>'._("1-й час").':</i> '.blink ($readings['hour1'],'hlink').' '):'').
+		($readings['hour3']?('<i>'._("3-й час").':</i> '.blink ($readings['hour3'],'hlink').' '):'').
+		($readings['hour6']?('<i>'._("6-й час").':</i> '.blink ($readings['hour6'],'hlink').' '):'').
+		($readings['hour9']?('<i>'._("9-й час").':</i> '.blink ($readings['hour9'],'hlink').' '):'').
+		($readings['apostle']?('<i>'._("Лит.").': '._("Ап.").'-</i> '.blink ($readings['apostle'],'hlink').' '):'').
+		($readings['gospel']?('<i>'._("Ев.").'-</i> '.blink ($readings['gospel'],'hlink').' '):'').
+		($readings['evening']?('<i>'._("Веч.").':</i> '.blink ($readings['evening'],'hlink').' '):'').'</p>';
+}
+/*************************************************************************************
+	Пользовательская функция, которая формирует ссылку на Св.Писание 
+	на сайте пользователя
+	Получает параметры:
+		$abbr - обозначение книги на английском языке
+		$book - обозначение книги на языке локали
+		$ch - номера глав и стихов
+		
+	Возвращает ссылку на отрывок Св.Писания
+		
+**************************************************************************************/
+function hlink ($abbr, $book, $ch) {
+	
+	// Преобразовать номера глав и стихов к виду используемому в ссылке
+	$chapter = str_replace(':', '.', $ch);
+	$chapter = str_replace(',', '.', $chapter);
+
+	return '<a target="_blank" data-key="'.$book.'" class="bibleLink" data-href="'.$ch.'" href="https://orthodoxchina.cn/bible/reading/?v='.$abbr.'.'.$chapter.'">'.$book.$ch.'</a>';
 }

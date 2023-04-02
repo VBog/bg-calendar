@@ -23,7 +23,11 @@ function bg_getData($year) {
 		return $data;
 	}	
 */
-	$json = file_get_contents('calendar.json');
+	$locale = setlocale(LC_ALL, 0);
+	$calendar_json = './locale/'.$locale.'/DATA/calendar.json';
+	if (!file_exists($calendar_json)) $calendar_json = 'calendar.json';
+	
+	$json = file_get_contents($calendar_json);
 	$events = json_decode($json, true);
 	
 	// Период триодей в текущем году
@@ -140,10 +144,10 @@ function bg_getData($year) {
 		}
 		
 		// Тип литургии
-		if (is_ioann_zlatoust ($date)) $liturgy = 'Литургия свт. Иоанна Златоуста.';
-		elseif (is_vasiliy_velikiy($date)) $liturgy = 'Литургия свт. Василия Великого.';
-		elseif (is_grigoriy_dvoeslov ($date, $main_level <= 3)) $liturgy = 'Литургия Преждеосвященных Даров.';
-		else $liturgy = 'Нет литургии.';
+		if (is_ioann_zlatoust ($date)) $liturgy = _("Литургия свт. Иоанна Златоуста.");
+		elseif (is_vasiliy_velikiy($date)) $liturgy = _("Литургия свт. Василия Великого.");
+		elseif (is_grigoriy_dvoeslov ($date, $main_level <= 3)) $liturgy = _("Литургия Преждеосвященных Даров.");
+		else $liturgy = _("Нет литургии.");
 
 		// Добавляем в БД основные параметры дня
 		$data[$date]['afterfeast'] = $afterfeast;			// Попразднство
@@ -189,7 +193,7 @@ function bg_getData($year) {
 				$data[$date]['main_type'] != 'eve') {													// и НЕ Навечерие
 
 			// Проверяем переносы рядовых чтений на сегодня
-				$wd_name = ['за понедельник','за вторник','за среду','за четверг','за пятницу','за субботу','за Неделю'];
+				$wd_name = [_("за понедельник"),_("за вторник"),_("за среду"),_("за четверг"),_("за пятницу"),_("за субботу"),_("за Неделю")];
 
 				// Вчера Великий или бденный праздник и сегодня вторник
 				// или со вторника по субботу и позавчера Великий или бденный праздник
@@ -208,7 +212,7 @@ function bg_getData($year) {
 				}
 
 				// Рядовые чтений на сегодня
-				$ordinary = (array) $or->bg_day_readings ($date, 'Ряд.');
+				$ordinary = (array) $or->bg_day_readings ($date, _("Ряд."));
 				if (in_array($data[$date]['day_subtype'], ['sunday_before', 'sunday_after'])) { 
 					$ordinary['apostle'] = '';
 					$ordinary['gospel'] = '';
@@ -230,7 +234,7 @@ function bg_getData($year) {
 					(($data[$tomorrow]['main_level'] <= 2 && $data[$tomorrow]['main_feast_type'] == 'our_lord') || 		// Господский,
 						($data[$tomorrow]['main_level'] <= 2 && $wd_t < 7) ||											// или Великий и Бденный в будни
 						$data[$tomorrow]['main_type'] == 'eve') ) {														// или Навечерие
-				$readings[] = (array) $or->bg_day_readings ($date, 'Ряд.');					
+				$readings[] = (array) $or->bg_day_readings ($date, _("Ряд."));					
 			}
 		} else $readings[] = (array) $or->bg_day_readings ($date, '');
 
@@ -271,6 +275,7 @@ function is_grigoriy_dvoeslov ($date, $polyeles=false) {
 	list ($year, $m, $d) = explode ('-', $date);
 	
 	$date_array = array_merge (	bg_get_date_by_rule('3,5:0--48,0--9', $year),	// Ср и Пт Четыредесятницы
+								bg_get_date_by_rule('0--17', $year),			// Чт 5-ой седмицы, Мариинино стояние
 								bg_get_date_by_rule('0--6,0--4', $year) );		// с Пн по Ср Страстной седмицы
 	
 	if (in_array($date, bg_get_date_by_rule('03-25', $year)))  return false;							// Благовещение 
@@ -295,3 +300,251 @@ function is_ioann_zlatoust ($date) {
 		!in_array($date, $date_array)) ) return true;				// или НЕ Великий Пост
 	else return false;
 }	
+
+/*******************************************************************************
+
+	Функция возвращает тропари и кондаки дня
+
+*******************************************************************************/  
+function bg_tropary_days ($date) {
+
+	list($y, $m, $d) = explode('-', $date);
+
+	$easter = bg_get_easter((int)$y);
+	$antieaster = bg_get_easter((int)$y, 7);
+
+	if ($date == $easter) return '';					// На Пасху ничего не выводить
+	elseif ($date > $easter && $date < $antieaster) {	// На Светлой седмице Пасхальные тропари и кондаки
+		$wd = 0;
+		$tone = 0;
+	} else {											// Дня или гласа
+		$wd = date("N",strtotime($date));
+		$tone = bg_getTone($date);
+	}
+		
+	$locale = setlocale(LC_ALL, 0);
+	$tropary_json = './locale/'.$locale.'/DATA/tropary.json';
+	if (!file_exists($tropary_json)) $tropary_json = 'tropary.json';
+	
+	$json = file_get_contents($tropary_json);
+	$tropary = json_decode($json, true);
+	
+	if ($wd == 7) {
+		$found_key = array_search($voice, array_column($tropary, 'voice'));
+	} else {
+		$found_key = array_search($wd, array_column($tropary, 'wd'));
+	}
+
+	return $tropary[$found_key];
+}
+
+/*************************************************************************************
+	Функция переводит абревиатуру книг на язык локали и формирует гиперссылки на сайт Библии
+
+	Параметры:
+		$reference - ссылка на Библию на русском языке
+		$customLink - имя пользовательской функции, формирующей ссылку на сайт Библии пользователя
+		
+	Возвращает ссылку на отрывок Св.Писания
+		
+**************************************************************************************/
+// 
+function blink ($reference, $customLink) {
+	$bg_bibrefs_abbr = array(		// Стандартные обозначение книг Священного Писания
+		// Ветхий Завет
+		// Пятикнижие Моисея															
+		'Gen'		=>"Быт", 
+		'Ex'		=>"Исх", 
+		'Lev'		=>"Лев",
+		'Num'		=>"Чис",
+		'Deut'		=>"Втор",
+		// «Пророки» (Невиим) 
+		'Nav'		=>"Нав",
+		'Judg'		=>"Суд",
+		'Rth'		=>"Руф",
+		'1Sam'		=>"1Цар",
+		'2Sam'		=>"2Цар",
+		'1King'		=>"3Цар",
+		'2King'		=>"4Цар",
+		'1Chron'	=>"1Пар",
+		'2Chron'	=>"2Пар",
+		'Ezr'		=>"1Езд",
+		'Nehem'		=>"Неем",
+		'Est'		=>"Есф",
+		// «Писания» (Ктувим)
+		'Job'		=>"Иов",
+		'Ps'		=>"Пс",
+		'Prov'		=>"Притч", 
+		'Eccl'		=>"Еккл",
+		'Song'		=>"Песн",
+		'Is'		=>"Ис",
+		'Jer'		=>"Иер",
+		'Lam'		=>"Плч",
+		'Ezek'		=>"Иез",
+		'Dan'		=>"Дан",	
+		// Двенадцать малых пророков 
+		'Hos'		=>"Ос",
+		'Joel'		=>"Иоил",
+		'Am'		=>"Ам",
+		'Avd'		=>"Авд",
+		'Jona'		=>"Ион",
+		'Mic'		=>"Мих",
+		'Naum'		=>"Наум",
+		'Habak'		=>"Авв",
+		'Sofon'		=>"Соф",
+		'Hag'		=>"Аг",
+		'Zah'		=>"Зах",
+		'Mal'		=>"Мал",
+		// Второканонические книги
+		'1Mac'		=>"1Мак",
+		'2Mac'		=>"2Мак",
+		'3Mac'		=>"3Мак",
+		'Bar'		=>"Вар",
+		'2Ezr'		=>"2Езд",
+		'3Ezr'		=>"3Езд",
+		'Judf'		=>"Иудиф",
+		'pJer'		=>"ПослИер",
+		'Solom'		=>"Прем",
+		'Sir'		=>"Сир",
+		'Tov'		=>"Тов",
+		// Новый Завет
+		// Евангилие
+		'Mt'		=>"Мф",
+		'Mk'		=>"Мк",
+		'Lk'		=>"Лк",
+		'Jn'		=>"Ин",
+		// Деяния и послания Апостолов
+		'Act'		=>"Деян",
+		'Jac'		=>"Иак",
+		'1Pet'		=>"1Пет",
+		'2Pet'		=>"2Пет",
+		'1Jn'		=>"1Ин", 
+		'2Jn'		=>"2Ин",
+		'3Jn'		=>"3Ин",
+		'Juda'		=>"Иуд",
+		// Послания апостола Павла
+		'Rom'		=>"Рим",
+		'1Cor'		=>"1Кор",
+		'2Cor'		=>"2Кор",
+		'Gal'		=>"Гал",
+		'Eph'		=>"Еф",
+		'Phil'		=>"Флп",
+		'Col'		=>"Кол",
+		'1Thes'		=>"1Фес",
+		'2Thes'		=>"2Фес",
+		'1Tim'		=>"1Тим",
+		'2Tim'		=>"2Тим",
+		'Tit'		=>"Тит",
+		'Phlm'		=>"Флм",
+		'Hebr'		=>"Евр",
+		'Apok'		=>"Отк");
+
+
+	$bg_bibrefs_translate = array(		// Перевод обозначений книг Священного Писания
+		// Ветхий Завет
+		// Пятикнижие Моисея															
+		'Gen'		=>_("Быт"), 
+		'Ex'		=>_("Исх"), 
+		'Lev'		=>_("Лев"),
+		'Num'		=>_("Чис"),
+		'Deut'		=>_("Втор"),
+		// «Пророки» (Невиим) 
+		'Nav'		=>_("Нав"),
+		'Judg'		=>_("Суд"),
+		'Rth'		=>_("Руф"),
+		'1Sam'		=>_("1Цар"),
+		'2Sam'		=>_("2Цар"),
+		'1King'		=>_("3Цар"),
+		'2King'		=>_("4Цар"),
+		'1Chron'	=>_("1Пар"),
+		'2Chron'	=>_("2Пар"),
+		'Ezr'		=>_("1Езд"),
+		'Nehem'		=>_("Неем"),
+		'Est'		=>_("Есф"),
+		// «Писания» (Ктувим)
+		'Job'		=>_("Иов"),
+		'Ps'		=>_("Пс"),
+		'Prov'		=>_("Притч"), 
+		'Eccl'		=>_("Еккл"),
+		'Song'		=>_("Песн"),
+		'Is'		=>_("Ис"),
+		'Jer'		=>_("Иер"),
+		'Lam'		=>_("Плч"),
+		'Ezek'		=>_("Иез"),
+		'Dan'		=>_("Дан"),	
+		// Двенадцать малых пророков 
+		'Hos'		=>_("Ос"),
+		'Joel'		=>_("Иоил"),
+		'Am'		=>_("Ам"),
+		'Avd'		=>_("Авд"),
+		'Jona'		=>_("Ион"),
+		'Mic'		=>_("Мих"),
+		'Naum'		=>_("Наум"),
+		'Habak'		=>_("Авв"),
+		'Sofon'		=>_("Соф"),
+		'Hag'		=>_("Аг"),
+		'Zah'		=>_("Зах"),
+		'Mal'		=>_("Мал"),
+		// Второканонические книги
+		'1Mac'		=>_("1Мак"),
+		'1Mac'		=>_("2Мак"),
+		'3Mac'		=>_("3Мак"),
+		'Bar'		=>_("Вар"),
+		'2Ezr'		=>_("2Езд"),
+		'3Ezr'		=>_("3Езд"),
+		'Judf'		=>_("Иудиф"),
+		'pJer'		=>_("ПослИер"),
+		'Solom'		=>_("Прем"),
+		'Sir'		=>_("Сир"),
+		'Tov'		=>_("Тов"),
+		// Новый Завет
+		// Евангилие
+		'Mt'		=>_("Мф"),
+		'Mk'		=>_("Мк"),
+		'Lk'		=>_("Лк"),
+		'Jn'		=>_("Ин"),
+		// Деяния и послания Апостолов
+		'Act'		=>_("Деян"),
+		'Jac'		=>_("Иак"),
+		'1Pet'		=>_("1Пет"),
+		'2Pet'		=>_("2Пет"),
+		'1Jn'		=>_("1Ин"), 
+		'2Jn'		=>_("2Ин"),
+		'3Jn'		=>_("3Ин"),
+		'Juda'		=>_("Иуд"),
+		// Послания апостола Павла
+		'Rom'		=>_("Рим"),
+		'1Cor'		=>_("1Кор"),
+		'2Cor'		=>_("2Кор"),
+		'Gal'		=>_("Гал"),
+		'Eph'		=>_("Еф"),
+		'Phil'		=>_("Флп"),
+		'Col'		=>_("Кол"),
+		'1Thes'		=>_("1Фес"),
+		'2Thes'		=>_("2Фес"),
+		'1Tim'		=>_("1Тим"),
+		'2Tim'		=>_("2Тим"),
+		'Tit'		=>_("Тит"),
+		'Phlm'		=>_("Флм"),
+		'Hebr'		=>_("Евр"),
+		'Apok'		=>_("Отк"));
+
+
+	$bg_bibrefs_name = array_flip($bg_bibrefs_abbr);
+	
+	$reference = preg_replace('/((\xA0)|\s)+/u', '', $reference); // Уберем пробелы
+
+	$refs = explode (';', $reference);			// Несколько ссылок разделенных точкой с запятой
+	$hlink = '';
+	foreach($refs as $ref) {
+		list($name, $ch) = explode('.',$ref);	// Разделим ссылку на аббревиатуру и номера глав и стихов
+
+		$abbr = $bg_bibrefs_name[$name];		// Английская аббревиатура книги 
+		$book = $bg_bibrefs_translate[$abbr];	// Перевод названия книги
+		
+		// Вызываем пользовательскую функцию для формирования ссылки на Писание
+		$hlink .= $customLink ($abbr, $book, $ch).'; ';
+	}
+	$hlink = substr($hlink,0,-2);
+	return $hlink;
+}
