@@ -543,7 +543,8 @@ function blink ($reference, $customLink) {
 		$book = $bg_bibrefs_translate[$abbr];	// Перевод названия книги
 		
 		// Вызываем пользовательскую функцию для формирования ссылки на Писание
-		$hlink .= $customLink ($abbr, $book, $ch).'; ';
+		if (function_exists($customLink)) $hlink .= $customLink ($abbr, $book, $ch).'; ';
+		else $hlink .= $ref.'; ';
 	}
 	$hlink = substr($hlink,0,-2);
 	return $hlink;
