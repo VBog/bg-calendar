@@ -275,15 +275,15 @@ for ($i=1; $i<6; $i++) {
 **************************************************************************************/
 function bg_printReadings ($readings) {
 	if (empty($readings)) return;
-	echo '<p>'.($readings['title']?('<i>'.$readings['title'].':</i> '):'').
-		($readings['morning']?('<i>'._("Утр.").':</i> '.blink ($readings['morning'],'hlink').' '):'').
-		($readings['hour1']?('<i>'._("1-й час").':</i> '.blink ($readings['hour1'],'hlink').' '):'').
-		($readings['hour3']?('<i>'._("3-й час").':</i> '.blink ($readings['hour3'],'hlink').' '):'').
-		($readings['hour6']?('<i>'._("6-й час").':</i> '.blink ($readings['hour6'],'hlink').' '):'').
-		($readings['hour9']?('<i>'._("9-й час").':</i> '.blink ($readings['hour9'],'hlink').' '):'').
-		($readings['apostle']?('<i>'._("Лит.").': '._("Ап.").'-</i> '.blink ($readings['apostle'],'hlink').' '):'').
-		($readings['gospel']?('<i>'._("Ев.").'-</i> '.blink ($readings['gospel'],'hlink').' '):'').
-		($readings['evening']?('<i>'._("Веч.").':</i> '.blink ($readings['evening'],'hlink').' '):'').'</p>';
+	echo '<p>'.(!empty($readings['title'])?('<i>'.$readings['title'].':</i> '):'').
+		(!empty($readings['morning'])?('<i>'._("Утр.").':</i> '.blink ($readings['morning'],'hlink').' '):'').
+		(!empty($readings['hour1'])?('<i>'._("1-й час").':</i> '.blink ($readings['hour1'],'hlink').' '):'').
+		(!empty($readings['hour3'])?('<i>'._("3-й час").':</i> '.blink ($readings['hour3'],'hlink').' '):'').
+		(!empty($readings['hour6'])?('<i>'._("6-й час").':</i> '.blink ($readings['hour6'],'hlink').' '):'').
+		(!empty($readings['hour9'])?('<i>'._("9-й час").':</i> '.blink ($readings['hour9'],'hlink').' '):'').
+		(!empty($readings['apostle'])?('<i>'._("Лит.").': '._("Ап.").'-</i> '.blink ($readings['apostle'],'hlink').' '):'').
+		(!empty($readings['gospel'])?('<i>'._("Ев.").'-</i> '.blink ($readings['gospel'],'hlink').' '):'').
+		(!empty($readings['evening'])?('<i>'._("Веч.").':</i> '.blink ($readings['evening'],'hlink').' '):'').'</p>';
 }
 /*************************************************************************************
 	Пользовательская функция, которая формирует ссылку на Св.Писание 
