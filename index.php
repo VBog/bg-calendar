@@ -43,33 +43,32 @@
 		text-align:left;
 		font-size: 100%;
 	}
-	@media screen and (max-width: 1200px) {
-		.container {
-			width: 100%;
-			font-size: 200%;
-		}
-	}
-	
 	details {
 		width: 100%;
-	}
-	pre {
-		white-space: pre-wrap;       /* css-3 */
-		white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-		white-space: -pre-wrap;      /* Opera 4-6 */
-		white-space: -o-pre-wrap;    /* Opera 7 */
-		word-wrap: break-word;       /* Internet Explorer 5.5+ */
 	}
 	input[type="button"],
 	summary {
 		cursor: pointer;
 	}
+	@media screen and (max-width: 1200px) {
+		.container {
+			width: 100%;
+			font-size: 200%;
+		}
+	.day-settings-today input {
+		font-size: 100%;
+	}
+		details.data {
+			display: none;
+		}
+	}
+	
 </style>
 </head>
 <body>
 <div class="container">
 <?php
-/***
+
 // Устанавливаем английский язык
 putenv('LC_ALL=en_US');
 setlocale(LC_ALL, 'en_US');
@@ -81,7 +80,7 @@ bindtextdomain("calendar", "./locale");
 textdomain("calendar");
 
 // Теперь поиск переводов будет идти в ./locale/en_US/LC_MESSAGES/calendar.mo
-***/
+
 
 include_once ('functions.php');
 include_once ('readings.php');
@@ -117,7 +116,7 @@ $data = bg_getData($old_y);
 		<input id="bg_tommorowButton" type="button" value="<?php echo _("Завтра"); ?> >">
 	</div>
 	
-	<details><summary><?php echo _("Данные дня"); ?></summary>
+	<details class="data"><summary><?php echo _("Данные дня"); ?></summary>
 		<pre>
 			<?php print_r($data[$date]); ?>
 		</pre>
@@ -162,8 +161,9 @@ for ($i=1; $i<6; $i++) {
 /*******************************************************
 	Выводим чтения суточного круга
 ********************************************************/
-// Тип литургии
-	echo '<p>'.$data[$date]['liturgy'].'</p>';
+// Тип литургии 
+	$liturgy = [_("Нет литургии.") ,_("Литургия свт. Иоанна Златоуста."), _("Литургия свт. Василия Великого."), _("Литургия Преждеосвященных Даров.")];
+	echo '<p>'.$liturgy[$data[$date]['liturgy']].'</p>';
 
 // Список чтений дня
 	// Праздники
@@ -302,5 +302,5 @@ function hlink ($abbr, $book, $ch) {
 	$chapter = str_replace(':', '.', $ch);
 	$chapter = str_replace(',', '.', $chapter);
 
-	return '<a target="_blank" data-key="'.$book.'" class="bibleLink" data-href="'.$ch.'" href="https://orthodoxchina.cn/bible/reading/?v='.$abbr.'.'.$chapter.'">'.$book.$ch.'</a>';
+	return '<a target="_blank" data-key="'.$book.'" class="bibleLink" data-href="'.$ch.'" href="https://orthodoxchina.cn/bible/reading/?v='.$abbr.'.'.$chapter.'">'.$book.'.'.$ch.'</a>';
 }

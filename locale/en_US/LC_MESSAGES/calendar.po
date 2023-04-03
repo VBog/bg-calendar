@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Orthodox Calendar\n"
 "POT-Creation-Date: 2023-04-02 21:13+0300\n"
-"PO-Revision-Date: 2023-04-02 21:14+0300\n"
+"PO-Revision-Date: 2023-04-03 08:00+0300\n"
 "Last-Translator: \n"
 "Language-Team: vadim.bogaiskov@gmail.com\n"
 "Language: en\n"
@@ -223,43 +223,43 @@ msgstr "Row"
 
 #: readings.php:446
 msgid "Быт"
-msgstr "Gen."
+msgstr "Gen"
 
 #: readings.php:447
 msgid "Исх"
-msgstr "Ex."
+msgstr "Ex"
 
 #: readings.php:448
 msgid "Лев"
-msgstr "Lev."
+msgstr "Lev"
 
 #: readings.php:449
 msgid "Чис"
-msgstr "Num."
+msgstr "Num"
 
 #: readings.php:450
 msgid "Втор"
-msgstr "Deut."
+msgstr "Deut"
 
 #: readings.php:452
 msgid "Нав"
-msgstr "Nav."
+msgstr "Nav"
 
 #: readings.php:453
 msgid "Суд"
-msgstr "Judg."
+msgstr "Judg"
 
 #: readings.php:454
 msgid "Руф"
-msgstr "Rth."
+msgstr "Rth"
 
 #: readings.php:455
 msgid "1Цар"
-msgstr "1Sam."
+msgstr "1Sam"
 
 #: readings.php:456
 msgid "2Цар"
-msgstr "2Sam."
+msgstr "2Sam"
 
 #: readings.php:457
 msgid "3Цар"
@@ -271,23 +271,23 @@ msgstr "2King"
 
 #: readings.php:459
 msgid "1Пар"
-msgstr "1Chron."
+msgstr "1Chron"
 
 #: readings.php:460
 msgid "2Пар"
-msgstr "2Chron."
+msgstr "2Chron"
 
 #: readings.php:461
 msgid "1Езд"
-msgstr "Ezr."
+msgstr "Ezr"
 
 #: readings.php:462
 msgid "Неем"
-msgstr "Nehem."
+msgstr "Nehem"
 
 #: readings.php:463
 msgid "Есф"
-msgstr "Est."
+msgstr "Est"
 
 #: readings.php:465
 msgid "Иов"
@@ -295,15 +295,15 @@ msgstr "Job "
 
 #: readings.php:466
 msgid "Пс"
-msgstr "Ps."
+msgstr "Ps"
 
 #: readings.php:467
 msgid "Притч"
-msgstr "Prov."
+msgstr "Prov"
 
 #: readings.php:468
 msgid "Еккл"
-msgstr "Eccl."
+msgstr "Eccl"
 
 #: readings.php:469
 msgid "Песн"
@@ -311,27 +311,27 @@ msgstr "Song "
 
 #: readings.php:470
 msgid "Ис"
-msgstr "Is."
+msgstr "Is"
 
 #: readings.php:471
 msgid "Иер"
-msgstr "Jer."
+msgstr "Jer"
 
 #: readings.php:472
 msgid "Плч"
-msgstr "Lam."
+msgstr "Lam"
 
 #: readings.php:473
 msgid "Иез"
-msgstr "Ezek."
+msgstr "Ezek"
 
 #: readings.php:474
 msgid "Дан"
-msgstr "Dan."
+msgstr "Dan"
 
 #: readings.php:476
 msgid "Ос"
-msgstr "Hos."
+msgstr "Hos"
 
 #: readings.php:477
 msgid "Иоил"
@@ -339,11 +339,11 @@ msgstr "Joel "
 
 #: readings.php:478
 msgid "Ам"
-msgstr "Am."
+msgstr "Am"
 
 #: readings.php:479
 msgid "Авд"
-msgstr "Avd."
+msgstr "Avd"
 
 #: readings.php:480
 msgid "Ион"
@@ -351,7 +351,7 @@ msgstr "Jona"
 
 #: readings.php:481
 msgid "Мих"
-msgstr "Mic."
+msgstr "Mic"
 
 #: readings.php:482
 msgid "Наум"
@@ -359,47 +359,47 @@ msgstr "Naum "
 
 #: readings.php:483
 msgid "Авв"
-msgstr "Habak."
+msgstr "Habak"
 
 #: readings.php:484
 msgid "Соф"
-msgstr "Sofon."
+msgstr "Sofon"
 
 #: readings.php:485
 msgid "Аг"
-msgstr "Hag."
+msgstr "Hag"
 
 #: readings.php:486
 msgid "Зах"
-msgstr "Zah."
+msgstr "Zah"
 
 #: readings.php:487
 msgid "Мал"
-msgstr "Mal."
+msgstr "Mal"
 
 #: readings.php:489
 msgid "1Мак"
-msgstr "1Mac."
+msgstr "1Mac"
 
 #: readings.php:490
 msgid "2Мак"
-msgstr "1Mac."
+msgstr "1Mac"
 
 #: readings.php:491
 msgid "3Мак"
-msgstr "3Mac."
+msgstr "3Mac"
 
 #: readings.php:492
 msgid "Вар"
-msgstr "Bar."
+msgstr "Bar"
 
 #: readings.php:493
 msgid "2Езд"
-msgstr "2Ezr."
+msgstr "2Ezr"
 
 #: readings.php:494
 msgid "3Езд"
-msgstr "3Ezr."
+msgstr "3Ezr"
 
 #: readings.php:495
 msgid "Иудиф"
@@ -407,63 +407,63 @@ msgstr "Judf "
 
 #: readings.php:496
 msgid "ПослИер"
-msgstr "pJer."
+msgstr "pJer"
 
 #: readings.php:497
 msgid "Прем"
-msgstr "Solom."
+msgstr "Solom"
 
 #: readings.php:498
 msgid "Сир"
-msgstr "Sir."
+msgstr "Sir"
 
 #: readings.php:499
 msgid "Тов"
-msgstr "Tov."
+msgstr "Tov"
 
 #: readings.php:502
 msgid "Мф"
-msgstr "Mt."
+msgstr "Mt"
 
 #: readings.php:503
 msgid "Мк"
-msgstr "Mk."
+msgstr "Mk"
 
 #: readings.php:504
 msgid "Лк"
-msgstr "Lk."
+msgstr "Lk"
 
 #: readings.php:505
 msgid "Ин"
-msgstr "Jn."
+msgstr "Jn"
 
 #: readings.php:507
 msgid "Деян"
-msgstr "Act."
+msgstr "Act"
 
 #: readings.php:508
 msgid "Иак"
-msgstr "Jac."
+msgstr "Jac"
 
 #: readings.php:509
 msgid "1Пет"
-msgstr "1Pet."
+msgstr "1Pet"
 
 #: readings.php:510
 msgid "2Пет"
-msgstr "2Pet."
+msgstr "2Pet"
 
 #: readings.php:511
 msgid "1Ин"
-msgstr "1Jn."
+msgstr "1Jn"
 
 #: readings.php:512
 msgid "2Ин"
-msgstr "2Jn."
+msgstr "2Jn"
 
 #: readings.php:513
 msgid "3Ин"
-msgstr "3Jn."
+msgstr "3Jn"
 
 #: readings.php:514
 msgid "Иуд"
@@ -471,63 +471,63 @@ msgstr "Juda "
 
 #: readings.php:516
 msgid "Рим"
-msgstr "Rom."
+msgstr "Rom"
 
 #: readings.php:517
 msgid "1Кор"
-msgstr "1Cor."
+msgstr "1Cor"
 
 #: readings.php:518
 msgid "2Кор"
-msgstr "2Cor."
+msgstr "2Cor"
 
 #: readings.php:519
 msgid "Гал"
-msgstr "Gal."
+msgstr "Gal"
 
 #: readings.php:520
 msgid "Еф"
-msgstr "Eph."
+msgstr "Eph"
 
 #: readings.php:521
 msgid "Флп"
-msgstr "Phil."
+msgstr "Phil"
 
 #: readings.php:522
 msgid "Кол"
-msgstr "Col."
+msgstr "Col"
 
 #: readings.php:523
 msgid "1Фес"
-msgstr "1Thes."
+msgstr "1Thes"
 
 #: readings.php:524
 msgid "2Фес"
-msgstr "2Thes."
+msgstr "2Thes"
 
 #: readings.php:525
 msgid "1Тим"
-msgstr "1Tim."
+msgstr "1Tim"
 
 #: readings.php:526
 msgid "2Тим"
-msgstr "2Tim."
+msgstr "2Tim"
 
 #: readings.php:527
 msgid "Тит"
-msgstr "Tit."
+msgstr "Tit"
 
 #: readings.php:528
 msgid "Флм"
-msgstr "Phlm."
+msgstr "Phlm"
 
 #: readings.php:529
 msgid "Евр"
-msgstr "Hebr."
+msgstr "Hebr"
 
 #: readings.php:530
 msgid "Отк"
-msgstr "Apok."
+msgstr "Apok"
 
 #: sedmica.php:22 sedmica.php:59
 #, php-format

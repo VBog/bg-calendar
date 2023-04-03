@@ -16,13 +16,13 @@ include_once ('sedmica.php');
 function bg_getData($year) {
 	
 	$filename = 'data/'.$year.'.json';
-
+/*
 	if (file_exists($filename)) {
 		$json = file_get_contents($filename);
 		$data = json_decode($json, true);
 		return $data;
 	}	
-
+*/
 	$locale = setlocale(LC_ALL, 0);
 	$calendar_json = './locale/'.$locale.'/DATA/calendar.json';
 	if (!file_exists($calendar_json)) $calendar_json = 'calendar.json';
@@ -144,10 +144,10 @@ function bg_getData($year) {
 		}
 		
 		// Тип литургии
-		if (is_ioann_zlatoust ($date)) $liturgy = _("Литургия свт. Иоанна Златоуста.");
-		elseif (is_vasiliy_velikiy($date)) $liturgy = _("Литургия свт. Василия Великого.");
-		elseif (is_grigoriy_dvoeslov ($date, $main_level <= 3)) $liturgy = _("Литургия Преждеосвященных Даров.");
-		else $liturgy = _("Нет литургии.");
+		if (is_ioann_zlatoust ($date)) $liturgy = 1;
+		elseif (is_vasiliy_velikiy($date)) $liturgy = 2;
+		elseif (is_grigoriy_dvoeslov ($date, $main_level <= 3)) $liturgy = 3;
+		else $liturgy = 0;
 
 		// Добавляем в БД основные параметры дня
 		$data[$date]['afterfeast'] = $afterfeast;			// Попразднство
