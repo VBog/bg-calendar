@@ -1,8 +1,11 @@
 <!doctype html>
 <html lang="ru">
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="The orthodox calendar with liturgical readings and troparion.">
 
 <title>Православный календарь</title>
 
@@ -10,36 +13,30 @@
 	body {
 		font-size: large;
 	}
-	input {
-		font-size: medium;
-	}
 	.container {
 		display: block;
 		width: 420px;
 		margin: 0;
+		padding: 0 10px 0 10px;
 		font-size: 100%;
 	}
 	.day-settings-today {
 		width: 100%; 
-		margin: 0 20px 0 20px;
 		text-align: center;
 		font-size: 100%;
 	}
 	.calendar {
 		width: 100%; 
-		margin: 0 20px 0 20px;
 		text-align: center;
 		font-size: 100%;
 	}
 	.readings {
 		width: 100%; 
-		margin: 0 20px 0 20px;
 		text-align:left;
 		font-size: 100%;
 	}
 	.tropary {
 		width: 100%; 
-		margin: 0 20px 0 20px;
 		text-align:left;
 		font-size: 100%;
 	}
@@ -50,14 +47,11 @@
 	summary {
 		cursor: pointer;
 	}
-	@media screen and (max-width: 1200px) {
+
+	@media screen and (max-width: 1280px) {
 		.container {
 			width: 100%;
-			font-size: 200%;
 		}
-	.day-settings-today input {
-		font-size: 100%;
-	}
 		details.data {
 			display: none;
 		}
@@ -124,7 +118,7 @@ $data = bg_getData($old_y);
 	<hr>	
 	<div class="calendar">
 	<!-- Икона дня -->
-		<img height="250" src="https://azbyka.ru/days/storage/images/<?php echo $data[$date]['icon']; ?>" title="<?php echo $data[$date]['icon_title']; ?>" />
+		<img height="250" src="https://azbyka.ru/days/storage/images/<?php echo $data[$date]['icon']; ?>" title="<?php echo $data[$date]['icon_title']; ?>" alt="<?php echo $data[$date]['icon_title']; ?>" />
 	<!-- Дата по новому стилю -->
 		<h3<?php echo (($wd==7)?' style=" color:red"':""); ?>><?php echo $weekday[$wd-1].',<br>'. sprintf (_('%1$d %2$s %3$d г.'), (int)$d , $monthes[$m-1] , (int)$y); ?><br>
 	<!-- и по старому стилю -->
@@ -135,6 +129,7 @@ $data = bg_getData($old_y);
 		<p><?php echo _("Глас").' '.$data[$date]['tone']; ?>, <?php echo $data[$date]['food']; ?></p>
 	
 <?php
+$level_name = [_('Двунадесятый'), _('Великий'), _('Бденный'), _('Полиелейный'), _('Славословный'), _('Шестеричный'), _('Вседневный'), _('Особый')];
 /*******************************************************
 	Выводим названия событий пятью абзацами.
 		1. Есть служба в Минее/Триоди
@@ -149,7 +144,7 @@ for ($i=1; $i<6; $i++) {
 	foreach ($data[$date]['events'] as $event) {
 		$title = (in_array($event['level'], [1,8]))?('<b>'.$event['title'].'</b>'):$event['title'];
 		$title = '<span'.(($event['level'] < 3)?' style=" color:red"':"").'>'.$title.'</span>';
-		if ($event['priority'] == $i) $text .= '<img src="'.(($event['level'] < 7)?('symbols/S'.$event['level'].'.gif'):'').'" /> '. $title.'. ';
+		if ($event['priority'] == $i) $text .= (($event['level'] < 7)?('<img src="symbols/S'.$event['level'].'.gif" title="'.$level_name[$event['level']].'" alt="'.$level_name[$event['level']].'" /> '):''). $title.'. ';
 	}
 	if ($text) echo '<p>'.$text.'</p>';
 }
