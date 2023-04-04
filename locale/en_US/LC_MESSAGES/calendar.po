@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Orthodox Calendar\n"
-"POT-Creation-Date: 2023-04-02 21:13+0300\n"
-"PO-Revision-Date: 2023-04-03 20:38+0300\n"
+"POT-Creation-Date: 2023-04-04 09:00+0300\n"
+"PO-Revision-Date: 2023-04-04 09:05+0300\n"
 "Last-Translator: \n"
 "Language-Team: vadim.bogaiskov@gmail.com\n"
 "Language: en\n"
@@ -125,69 +125,74 @@ msgstr "%2$s, %1$d old style"
 msgid "Глас"
 msgstr "Tone"
 
-#: index.php:196
-msgid "Тропари, кондаки, молитвы и величания"
-msgstr "Troparia, kontakia, prayers and eulogies"
+#: index.php:165
+msgid "Нет литургии."
+msgstr "No liturgy."
 
-#: index.php:204
-msgid "Тропари и кондаки дня"
-msgstr "Day's troparia and kontakia"
-
-#: index.php:206 index.php:219
-msgid "глас"
-msgstr "tone"
-
-#: index.php:278
-msgid "Утр."
-msgstr "Matins"
-
-#: index.php:279
-msgid "1-й час"
-msgstr "1st hour"
-
-#: index.php:280
-msgid "3-й час"
-msgstr "3rd hour"
-
-#: index.php:281
-msgid "6-й час"
-msgstr "6th hour"
-
-#: index.php:282
-msgid "9-й час"
-msgstr "9th hour"
-
-#: index.php:283
-msgid "Лит."
-msgstr "Liturgy"
-
-#: index.php:283
-msgid "Ап."
-msgstr "Ap."
-
-#: index.php:284
-msgid "Ев."
-msgstr "Gos."
-
-#: index.php:285
-msgid "Веч."
-msgstr "Vespers"
-
-#: readings.php:147
+#: index.php:165
 msgid "Литургия свт. Иоанна Златоуста."
 msgstr "Liturgy of St. John Chrysostom."
 
-#: readings.php:148
+#: index.php:165
 msgid "Литургия свт. Василия Великого."
 msgstr "Liturgy of St. Basil the Great."
 
-#: readings.php:149
+#: index.php:165
 msgid "Литургия Преждеосвященных Даров."
 msgstr "Liturgy of the Presanctified Gifts."
 
-#: readings.php:150
-msgid "Нет литургии."
-msgstr "No liturgy."
+#: index.php:197
+msgid "Тропари, кондаки, молитвы и величания"
+msgstr "Troparia, kontakia, prayers and eulogies"
+
+#: index.php:205
+msgid "Тропари и кондаки дня"
+msgstr "Day's troparia and kontakia"
+
+#: index.php:207 index.php:220
+msgid "глас"
+msgstr "tone"
+
+#: index.php:279
+msgid "Утр."
+msgstr "Matins"
+
+#: index.php:280
+msgid "1-й час"
+msgstr "1st hour"
+
+#: index.php:281
+msgid "3-й час"
+msgstr "3rd hour"
+
+#: index.php:282
+msgid "6-й час"
+msgstr "6th hour"
+
+#: index.php:283
+msgid "9-й час"
+msgstr "9th hour"
+
+#: index.php:284
+msgid "Лит."
+msgstr "Liturgy"
+
+#: index.php:284
+msgid "Ап."
+msgstr "Ap."
+
+#: index.php:285
+msgid "Ев."
+msgstr "Gos."
+
+#: index.php:286
+msgid "Веч."
+msgstr "Vespers"
+
+#: readings.php:62 readings.php:68 readings.php:74
+#, php-format
+msgid "(перенос с %s)"
+msgstr "(rescheduled from %s)"
 
 #: readings.php:196
 msgid "за понедельник"

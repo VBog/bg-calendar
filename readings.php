@@ -15,6 +15,8 @@ include_once ('sedmica.php');
 *******************************************************************************/  
 function bg_getData($year) {
 	
+	$wd_name = [_("за понедельник"),_("за вторник"),_("за среду"),_("за четверг"),_("за пятницу"),_("за субботу"),_("за Неделю")];
+	
 	$filename = 'data/'.$year.'.json';
 /*
 	if (file_exists($filename)) {
@@ -43,6 +45,12 @@ function bg_getData($year) {
 		$dates = bg_get_date_by_rule ($event['rule'], $year);
 		if (!empty($dates)) {
 			foreach ($dates as $date) {
+				$dd = bg_ddif($year);
+				$old = date("j-m", strtotime($date.'- '.$dd.' days'));
+				$old = preg_replace_callback ('/(\d+)\-(\d+)/u', function ($matches) {
+						$monthes = [_("января"),_("февраля"),_("марта"),_("апреля"),_("мая"),_("июня"),_("июля"),_("августа"),_("сентября"),_("октября"),_("ноября"),_("декабря")];
+						return $matches[1].' '.$monthes[$matches[2]-1];
+					}, $old);
 				
 			// Отменяем чтения
 				// В период триодей чтения только на полиейные праздники
@@ -59,20 +67,38 @@ function bg_getData($year) {
 					
 				// Во Вселенские родительские субботы праздники переносим на предыдущий Чт
 					if (in_array($date, $universal_saturday)) {
-						$event['title'] .= ' (перенос с '. date("j/m", strtotime($date)).')';
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = date ('Y-m-d', strtotime($date.'- 2 days'));
 						$data[$newdate]['events'][] = $event;
 
 				// В Димитриевскую родительскую субботу праздники переносим на предыдущую Пт
 					} elseif (in_array($date, $dimitry_saturday)) {
-						$event['title'] .= ' (перенос с '. date("j/m", strtotime($date)).')';
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
 						$data[$newdate]['events'][] = $event;
 					
 				// Первые 4 дня Великого поста праздники переносим на следующую Сб
-					} elseif (in_array($date, bg_get_date_by_rule ('0--48,0--45', $year))) {
-						$event['title'] .= ' (перенос с '. date("j/m", strtotime($date)).')';
+					} elseif (in_array($date, bg_get_date_by_rule ('0--47,0--44', $year))) {
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = bg_get_new_date ('0--43', $year);
+						$data[$newdate]['events'][] = $event;
+
+				// В Ср 4-й седмицы, то есть в преполовение Великого поста праздники переносим на Вт 4-й седмицы
+					} elseif (in_array($date, bg_get_date_by_rule ('0--25', $year))) {
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'),  $old);
+						$newdate = bg_get_new_date ('0--26', $year);
+						$data[$newdate]['events'][] = $event;
+
+				// В Чт 5-й седмицы — в службу Великого канона праздники переносим на Вт 5-й седмицы
+					} elseif (in_array($date, bg_get_date_by_rule ('0--17', $year))) {
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
+						$newdate = bg_get_new_date ('0--19', $year);
+						$data[$newdate]['events'][] = $event;
+
+				// В субботу Акафиста (Сб 5-й седмицы) праздники переносим на Неделю 5-ю Великого поста
+					} elseif (in_array($date, bg_get_date_by_rule ('0--15', $year))) {
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
+						$newdate = bg_get_new_date ('0--14', $year);
 						$data[$newdate]['events'][] = $event;
 
 					} else {
@@ -193,7 +219,6 @@ function bg_getData($year) {
 				$data[$date]['main_type'] != 'eve') {													// и НЕ Навечерие
 
 			// Проверяем переносы рядовых чтений на сегодня
-				$wd_name = [_("за понедельник"),_("за вторник"),_("за среду"),_("за четверг"),_("за пятницу"),_("за субботу"),_("за Неделю")];
 
 				// Вчера Великий или бденный праздник и сегодня вторник
 				// или со вторника по субботу и позавчера Великий или бденный праздник
