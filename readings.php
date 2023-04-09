@@ -333,17 +333,22 @@ function is_ioann_zlatoust ($date) {
 *******************************************************************************/  
 function bg_tropary_days ($date) {
 
-	list($y, $m, $d) = explode('-', $date);
+	$old = bg_get_old_date ($date);
+
+	list($y, $m, $d) = explode('-', $old);
+	$wd = date("N",strtotime($date));
 
 	$easter = bg_get_easter((int)$y);
 	$antieaster = bg_get_easter((int)$y, 7);
+	$our_lord = bg_get_date_by_rule('01-06;02-02|0--49;0--7;0-0;0-39;0-49;08-06;09-14;12-25', $y);	// Господские двунадесятые
+	$our_lady = bg_get_date_by_rule('03-25;08-15;09-08;11-21', $y);	// Богородичные двунадесятые
 
-	if ($date == $easter) return '';					// На Пасху ничего не выводить
-	elseif ($date > $easter && $date < $antieaster) {	// На Светлой седмице Пасхальные тропари и кондаки
+	if (in_array ($date, $our_lord)) return '';					// На Пасху и в господские двунадесятые праздники ничего не выводить
+	elseif (in_array ($date, $our_lady) && $wd != 7) return '';	// В богородичные двунадесятые праздники по будням ничего не выводить
+	elseif ($date > $easter && $date < $antieaster) {			// На Светлой седмице Пасхальные тропари и кондаки
 		$wd = 0;
 		$tone = 0;
 	} else {											// Дня или гласа
-		$wd = date("N",strtotime($date));
 		$tone = bg_getTone($date);
 	}
 		
@@ -355,7 +360,7 @@ function bg_tropary_days ($date) {
 	$tropary = json_decode($json, true);
 	
 	if ($wd == 7) {
-		$found_key = array_search($voice, array_column($tropary, 'voice'));
+		$found_key = array_search($tone, array_column($tropary, 'voice'));
 	} else {
 		$found_key = array_search($wd, array_column($tropary, 'wd'));
 	}
