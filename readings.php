@@ -63,7 +63,7 @@ function bg_getData($year) {
 				}
 				
 			// Переносим праздники
-				if (!empty($event['readings']) && $event['level'] > 1 && $event['level'] != 8) {
+				if (!empty($event['readings']) && (($event['level'] > 1 && $event['level'] != 8) || in_array($event['type'],['prefeast']))) {
 					
 				// Во Вселенские родительские субботы праздники переносим на предыдущий Чт
 					if (in_array($date, $universal_saturday)) {

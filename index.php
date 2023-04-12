@@ -6,6 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="description" content="The orthodox calendar with liturgical readings and troparion.">
+<link rel="icon" type="image/gif" href="./symbols/S0.gif">
 
 <title>Православный календарь</title>
 
@@ -17,7 +18,7 @@
 		display: block;
 		width: 420px;
 		margin: 0;
-		padding: 0 10px 0 10px;
+		padding: 0;
 		font-size: 100%;
 	}
 	.day-settings-today {
@@ -46,6 +47,10 @@
 	input[type="button"],
 	summary {
 		cursor: pointer;
+	}
+	.bg_bibleRef {
+		cursor: help;
+		text-decoration: underline;
 	}
 
 	@media screen and (max-width: 1280px) {
@@ -97,6 +102,8 @@ $easter = bg_get_easter($y);
 $dd = ($y-$y%100)/100 - ($y-$y%400)/400 - 2;
 $old = date("Y-m-d",strtotime ($date.' - '.$dd.' days')) ;
 list($old_y,$old_m,$old_d) = explode ('-', $old);
+
+$tomorrow = date ('Y-m-d', strtotime($date.'+ 1 days'));
 
 $data = array();
 $data = bg_getData($old_y);
@@ -165,7 +172,7 @@ for ($i=1; $i<6; $i++) {
 	foreach ($data[$date]['events'] as $event) {
 		if (!in_array($data[$date]['day_subtype'], ['universal_saturday', 'eve'])) {
 			if ($wd == 6 || (is_numeric($event['priority']) && $event['level'] < 3 && $wd < 7)) { // Суббота или Бдение и выше
-				bg_printReadings ($event['readings']);
+				bg_printReadings ($event['readings'], false);
 			}
 		}
 	}
@@ -177,15 +184,36 @@ for ($i=1; $i<6; $i++) {
 	foreach ($data[$date]['events'] as $event) {
 		if (!in_array($data[$date]['day_subtype'], ['universal_saturday', 'eve'])) {
 			if ($wd != 6 && is_numeric($event['priority']) && !($event['level'] < 3 && $wd < 7)) { // Не суббота и Полиелей и ниже
-				bg_printReadings ($event['readings']);
+				bg_printReadings ($event['readings'], false);
 			}
 		} else {
 			if (in_array($event['subtype'], ['universal_saturday', 'eve'])) {
-				bg_printReadings ($event['readings']);
+				bg_printReadings ($event['readings'], false);
 			}
 		}
+		
+	}
+	foreach ($data[$tomorrow]['events'] as $event) {
+		bg_printEvReadings ($event['readings']);
 	}
 ?>
+	</div>
+	<div id="bible">
+	<?php 
+		$ref = $_POST["ref"];
+		if (!empty($ref)) {
+			$text = bg_get_bible ($ref);
+			if (!$text) $text = bg_get_paremiaes ($ref);
+			if (!$text) $text = blink ($ref,'az_hlink');
+	?>
+		<hr>
+		<div style="width: 100%; text-align: right;">
+			<input id="bg_clear" type="button" value="<?php echo _("Очистить"); ?>">
+		</div>
+	<?php
+			echo $text; 
+		}
+	?>
 	</div>
 	<hr>
 	<div class='tropary'>
@@ -248,6 +276,12 @@ for ($i=1; $i<6; $i++) {
 		setParam(true);
 	}, false);
 
+	// Очистить div с текстом Библии
+	var bg_clear = document.getElementById("bg_clear");
+	if (bg_clear) bg_clear.addEventListener('click', function() {
+		document.getElementById("bible").innerHTML='';
+	}, false);
+	
 	function setParam (param=true) {
 		var url=location.href;
 		url=url.substring(0, url.indexOf('?')); 
@@ -258,6 +292,29 @@ for ($i=1; $i<6; $i++) {
 		}
 		location.href=url;
 	}
+	// Отправляем POST запрос с ссылкой на Библию 
+	var els = document.getElementsByClassName("bg_bibleRef");
+	Array.prototype.forEach.call(els, function(el) {
+		el.addEventListener("click",
+			function() {
+				var url=location.href;
+				var xhr = new XMLHttpRequest();
+				xhr.open("POST", url, false);
+				xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				xhr.onreadystatechange = function() {
+					if (this.readyState != 4) return;
+//					location.reload();
+					document.body.innerHTML = '';
+					document.write(xhr.responseText);				
+					return false;
+				}
+				var ref = el.innerText;
+				xhr.send("ref="+ref);
+			},
+			false
+		);
+	});
+	
 </script>
 </div>
 </body>
@@ -265,12 +322,13 @@ for ($i=1; $i<6; $i++) {
 <?php
 /*************************************************************************************
 
-	Пользовательская функция выводит ссылки на чтения Св.Писания
+	Пользовательские функции выводят ссылки на чтения Св.Писания
 		
 **************************************************************************************/
-function bg_printReadings ($readings) {
+// Всего дня 
+function bg_printReadings ($readings, $evening=true) {
 	if (empty($readings)) return;
-	echo '<p>'.(!empty($readings['title'])?('<i>'.$readings['title'].':</i> '):'').
+	$text =
 		(!empty($readings['morning'])?('<i>'._("Утр.").':</i> '.blink ($readings['morning'],'hlink').' '):'').
 		(!empty($readings['hour1'])?('<i>'._("1-й час").':</i> '.blink ($readings['hour1'],'hlink').' '):'').
 		(!empty($readings['hour3'])?('<i>'._("3-й час").':</i> '.blink ($readings['hour3'],'hlink').' '):'').
@@ -278,8 +336,17 @@ function bg_printReadings ($readings) {
 		(!empty($readings['hour9'])?('<i>'._("9-й час").':</i> '.blink ($readings['hour9'],'hlink').' '):'').
 		(!empty($readings['apostle'])?('<i>'._("Лит.").': '._("Ап.").'-</i> '.blink ($readings['apostle'],'hlink').' '):'').
 		(!empty($readings['gospel'])?('<i>'._("Ев.").'-</i> '.blink ($readings['gospel'],'hlink').' '):'').
-		(!empty($readings['evening'])?('<i>'._("Веч.").':</i> '.blink ($readings['evening'],'hlink').' '):'').'</p>';
+		($evening && !empty($readings['evening'])?('<i>'._("Веч.").':</i> '.blink ($readings['evening'],'hlink').' '):'');
+	echo $text?('<p>'.(!empty($readings['title'])?('<i>'.$readings['title'].':</i> '):'').$text.'</p>'):'';
 }
+// Вечера
+function bg_printEvReadings ($readings) {
+	if (empty($readings)) return;
+	$text = (!empty($readings['evening'])?('<i>'._("Веч.").':</i> '.blink ($readings['evening'],'hlink').' '):'');
+	echo $text?('<p>'.(!empty($readings['title'])?('<i>'.$readings['title'].':</i> '):'').$text.'</p>'):'';
+}
+
+
 /*************************************************************************************
 	Пользовательская функция, которая формирует ссылку на Св.Писание 
 	на сайте пользователя
@@ -291,11 +358,71 @@ function bg_printReadings ($readings) {
 	Возвращает ссылку на отрывок Св.Писания
 		
 **************************************************************************************/
-function hlink_ ($abbr, $book, $ch) {
-	
-	// Преобразовать номера глав и стихов к виду используемому в ссылке
-	$chapter = str_replace(':', '.', $ch);
-	$chapter = str_replace(',', '.', $chapter);
+function az_hlink ($abbr, $book, $ch) {
+// Ссылка на Библию
+	return '<a target="_blank" href="https://azbyka.ru/biblia/?'.$abbr.'.'.$ch.'">'.$book.'.'.$ch.'</a>';
+} 
+function hlink ($abbr, $book, $ch) {
 
-	return '<a target="_blank" data-key="'.$book.'" class="bibleLink" data-href="'.$ch.'" href="https://orthodoxchina.cn/bible/reading/?v='.$abbr.'.'.$chapter.'">'.$book.'.'.$ch.'</a>';
+	return '<span class="bg_bibleRef" title="'._("Текст Библии").'">'.$book.'.'.$ch.'</span>';
+} 
+		
+/*******************************************************************************
+
+	Функция возвращает текст служебной Библии в соответствии с запросом 
+		$ref - ссылка на отрывок в Библии
+	
+*******************************************************************************/
+function bg_get_bible ($ref) {
+	
+	$json = file_get_contents( dirname(__FILE__).'/liturgical_bible/bible.json' );
+	$obj = json_decode ($json, true);
+	if (empty($obj)) return '';
+	$ref = preg_replace ('/\s+/u', '', $ref);
+
+	$txt = "";
+	$content = $obj['content'] ?? '';
+	if ($content) {
+		foreach (array_column($content, 'ref') as $key => $value) {
+			$value = preg_replace ('/[АБ]/u', '', $value);
+//			if ($value == $ref) break;
+			if (mb_strpos($value, $ref) !== false) break;
+			else $key = false;
+		}
+		if ($key === false) return '';
+		$txt = $content[$key]['excerpt'];
+		if (function_exists('bg_bibrefs')) $value = bg_bibrefs($value);
+		$title = '<p><strong>'.$content[$key]['title'].' '.$content[$key]['desc'].' ('.$value.')</strong></p>';
+	}
+	if ($txt) $txt = '<div class="bg_bibrefs_service">'.$title.$txt.'</div>';
+	return $txt;
+}
+/*******************************************************************************
+
+	Функция возвращает текст служебного Паримийника в соответствии с запросом 
+		$ref - ссылка на отрывок в Библии
+	
+*******************************************************************************/
+function bg_get_paremiaes ($ref) {
+	
+	$json = file_get_contents( dirname(__FILE__).'/liturgical_bible/paremiaes.json' );
+	$obj = json_decode ($json, true);
+	if (empty($obj)) return '';
+	$ref = preg_replace ('/\s+/u', '', $ref);
+
+	$txt = "";
+	$content = $obj['content'] ?? '';
+	if ($content) {
+		foreach (array_column($content, 'ref') as $key => $value) {
+//			if ($value == $ref) break;
+			if (mb_strpos($value, $ref) !== false) break;
+			else $key = false;
+		}
+		if ($key === false) return '';
+		$txt = $content[$key]['excerpt'];
+		if (function_exists('bg_bibrefs')) $value = bg_bibrefs($value);
+		$title = '<p><strong>'.$content[$key]['title'].' '.$content[$key]['desc'].' ('.$value.')</strong></p>';
+	}
+	if ($txt) $txt = '<div class="bg_bibrefs_service">'.$title.$txt.'</div>';
+	return $txt;
 }
