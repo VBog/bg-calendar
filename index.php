@@ -6,17 +6,20 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="description" content="The orthodox calendar with liturgical readings and troparion.">
-<link rel="icon" type="image/gif" href="./symbols/S0.gif">
+<link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16x16.png">
+<link rel="manifest" href="./icons/site.webmanifest">
 
 <title>Православный календарь</title>
 
 <style>
 	body {
-		font-size: large;
+		font-size: 1.2em;
 	}
 	.container {
 		display: block;
-		width: 420px;
+		width: 640px;
 		margin: 0;
 		padding: 0;
 		font-size: 100%;
@@ -47,6 +50,21 @@
 	input[type="button"],
 	summary {
 		cursor: pointer;
+	}
+	hr {
+		margin:0;
+	}
+	#bg_bible_text {
+		background-color: #eee;
+		padding: 0;
+		margin: 0;
+	}
+	div.bg_hide_block {
+		width: 100%; 
+		text-align: right;
+	}
+	.bg_hide_block input {
+		margin-right: 1em;
 	}
 	.bg_bibleRef {
 		cursor: help;
@@ -198,25 +216,27 @@ for ($i=1; $i<6; $i++) {
 	}
 ?>
 	</div>
-	<div id="bible">
+<!-- Текст Библии -->
+	<div id="bg_bible_text">
 	<?php 
 		$ref = $_POST["ref"];
 		if (!empty($ref)) {
-			$text = bg_get_bible ($ref);
-			if (!$text) $text = bg_get_paremiaes ($ref);
-			if (!$text) $text = blink ($ref,'az_hlink');
+			$text = bg_get_bible ($ref);					// Служебные Апостол и Евангелие
+			if (!$text) $text = bg_get_paremiaes ($ref);	// Служебные Паримии
+			if (!$text) $text = blink ($ref,'az_hlink');	// Ссылка на сайт Библии
 	?>
 		<hr>
-		<div style="width: 100%; text-align: right;">
-			<input id="bg_clear" type="button" value="<?php echo _("Очистить"); ?>">
+		<div class="bg_hide_block">
+			<input id="bg_hide_block" type="button" value="<?php echo _("Скрыть"); ?>">
 		</div>
 	<?php
-			echo $text; 
+			echo $text.'<br>'; 
 		}
 	?>
 	</div>
-	<hr>
+<!-- Тропари, кондаки, молитвы и величания -->
 	<div class='tropary'>
+	<hr>
 	<h3><?php echo _("Тропари, кондаки, молитвы и величания"); ?></h3>
 <?php 
 /*******************************************************
@@ -277,9 +297,9 @@ for ($i=1; $i<6; $i++) {
 	}, false);
 
 	// Очистить div с текстом Библии
-	var bg_clear = document.getElementById("bg_clear");
-	if (bg_clear) bg_clear.addEventListener('click', function() {
-		document.getElementById("bible").innerHTML='';
+	var bg_hide_block = document.getElementById("bg_hide_block");
+	if (bg_hide_block) bg_hide_block.addEventListener('click', function() {
+		document.getElementById("bg_bible_text").innerHTML='';
 	}, false);
 	
 	function setParam (param=true) {
@@ -364,7 +384,7 @@ function az_hlink ($abbr, $book, $ch) {
 } 
 function hlink ($abbr, $book, $ch) {
 
-	return '<span class="bg_bibleRef" title="'._("Текст Библии").'">'.$book.'.'.$ch.'</span>';
+	return '<span class="bg_bibleRef" title="'._("Показать текст").'">'.$book.'.'.$ch.'</span>';
 } 
 		
 /*******************************************************************************
@@ -416,6 +436,7 @@ function bg_get_paremiaes ($ref) {
 		foreach (array_column($content, 'ref') as $key => $value) {
 //			if ($value == $ref) break;
 			if (mb_strpos($value, $ref) !== false) break;
+			elseif (mb_strpos($ref, $value) !== false) break;
 			else $key = false;
 		}
 		if ($key === false) return '';
