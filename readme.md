@@ -277,7 +277,7 @@ textdomain("calendar");
 
 `js/edit.js` - js-скрипт редактора
 
-`js/codemirror.js` - библиотека подсветки синтаксиса
+`js/codemirror.js` - библиотека подсветки синтаксиса [CodeMirror](https://codemirror.net/)
 
 `js/mode/javascript.js` - синтаксис JavaScript и JSON
 
