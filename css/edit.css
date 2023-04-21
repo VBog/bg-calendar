@@ -1,0 +1,127 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Tahoma", sans-serif;
+  font-size: 18px;
+  line-height: 25px;
+  color: #6B4F38;
+  
+  background-color: #fff;
+}
+
+a {
+	text-decoration: none;
+	color: var(--link-color, #6b4f38);
+	outline: none;
+	text-underline-offset: 2px;
+}
+a:visited {
+	text-decoration: none;
+	color: var(--link-color, #6b4f38);
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+}
+.date_calendar {
+	max-width: 820px;
+	margin-bottom: 10px;
+	padding: 5px;
+	text-align: left;
+}
+details#by_date { 
+	margin-bottom: 1.2em;
+	border: #6b4f38 solid 2px;
+	border-radius: 5px;
+	padding: 0 0.5rem;
+}
+details#by_date summary {
+	font-weight: bold;
+	color: white;
+	background-color: #6b4f38;
+	padding: 3px 0 3px 0.5em;
+	margin: -1px calc(-0.5rem - 1px);
+	cursor: pointer;
+}
+input[type=submit],
+input[type=button]{
+	cursor: pointer;
+}
+.day-settings-today {
+	width: 100%; 
+	text-align: center;
+	font-size: 100%;
+}
+.calendar {
+	width: 100%; 
+	text-align: center;
+	font-size: 100%;
+}
+.readings {
+	width: 100%; 
+	text-align:left;
+	font-size: 100%;
+}
+
+
+.tasks__title {
+  margin: 50px 0 20px 0;
+  
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.tasks__list {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 760px;
+  list-style: none;
+  overflow: auto;
+}
+
+.tasks__item {
+  max-width: 850px;
+  margin-bottom: 10px;
+  padding: 5px;
+  
+  text-align: left;
+  border: 1px solid #DDC07A;
+  border-radius: 10px;
+  cursor: move;
+  background-color: #FBF5EA;
+
+  transition: background-color 0.5s;
+}
+
+.tasks__item:last-child {
+  margin-bottom: 0;
+}
+
+.selected {
+  opacity: 0.6;
+}
+
+.form-control {
+	display: table;
+	width: 100%
+}
+
+label.je-form-input-label {
+	display: table-cell !important;
+	width: 30%;
+	white-space: nowrap;
+}
+div.CodeMirror,
+textarea {
+	width:calc(100% - 5px);
+	height: 484px;
+	font-size: 20px;
+}  
+.red {
+	color: red;
+}

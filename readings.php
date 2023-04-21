@@ -63,7 +63,7 @@ function bg_getData($year) {
 				}
 				
 			// Переносим праздники
-				if (!empty($event['readings']) && (($event['level'] > 1 && $event['level'] != 8) || in_array($event['type'],['prefeast']))) {
+				if (!empty($event['readings']) && (($event['level'] > 1 && $event['level'] != 8) || in_array($event['subtype'],['prefeast']))) {
 					
 				// Во Вселенские родительские субботы праздники переносим на предыдущий Чт
 					if (in_array($date, $universal_saturday)) {
@@ -142,8 +142,8 @@ function bg_getData($year) {
 					}
 					break;
 				}
-			} elseif (in_array($event['type'], ['', 'feastend'] )) {
-				$afterfeast = $event['type'];
+			} elseif (in_array($event['subtype'], ['', 'feastend'] )) {
+				$afterfeast = $event['subtype'];
 				break;
 			}
 			if ($main_level > $event['level']) {
@@ -340,10 +340,10 @@ function bg_tropary_days ($date) {
 
 	$easter = bg_get_easter((int)$y);
 	$antieaster = bg_get_easter((int)$y, 7);
-	$our_lord = bg_get_date_by_rule('01-06;02-02|0--49;0--7;0-0;0-39;0-49;08-06;09-14;12-25', $y);	// Господские двунадесятые
+	$our_lord = bg_get_date_by_rule('01-06;02-02|0--49;0--7,0-0;0-39;0-49;08-06;09-14;12-25', $y);	// Господские двунадесятые
 	$our_lady = bg_get_date_by_rule('03-25;08-15;09-08;11-21', $y);	// Богородичные двунадесятые
 
-	if (in_array ($date, $our_lord)) return '';					// На Пасху и в господские двунадесятые праздники ничего не выводить
+	if (in_array ($date, $our_lord)) return '';					// В Страстную Седмицу, на Пасху и в господские двунадесятые праздники ничего не выводить
 	elseif (in_array ($date, $our_lady) && $wd != 7) return '';	// В богородичные двунадесятые праздники по будням ничего не выводить
 	elseif ($date > $easter && $date < $antieaster) {			// На Светлой седмице Пасхальные тропари и кондаки
 		$wd = 0;

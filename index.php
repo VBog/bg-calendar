@@ -145,7 +145,7 @@ $data = bg_getData($old_y);
 	<!-- Икона дня -->
 		<img height="250" src="https://azbyka.ru/days/storage/images/<?php echo $data[$date]['icon']; ?>" title="<?php echo $data[$date]['icon_title']; ?>" alt="<?php echo $data[$date]['icon_title']; ?>" />
 	<!-- Дата по новому стилю -->
-		<h3<?php echo (($wd==7)?' style=" color:red"':""); ?>><?php echo $weekday[$wd-1].',<br>'. sprintf (_('%1$d %2$s %3$d г.'), (int)$d , $monthes[$m-1] , (int)$y); ?><br>
+		<h3<?php echo (($wd==7)?' style=" color:red"':""); ?>><?php echo $weekday[$wd-1].', '. sprintf (_('%1$d %2$s %3$d г.'), (int)$d , $monthes[$m-1] , (int)$y); ?><br>
 	<!-- и по старому стилю -->
 		<?php echo '('.sprintf (_('%1$d %2$s ст.ст.'), (int)$old_d, $monthes[$old_m-1]).')'; ?></h3>
 	<!-- Название седмицы/Недели -->
@@ -244,7 +244,7 @@ for ($i=1; $i<6; $i++) {
 ********************************************************/
 	// Тропари и кондаки дня
 	$event = bg_tropary_days ($date);
-	if ($date != bg_get_easter($y, 0) && !empty($event['taks']) && !empty($event['taks'][0])) {
+	if (!empty($event['taks']) && !empty($event['taks'][0])) {
 		echo '<details><summary>'._("Тропари и кондаки дня").'</summary>'.PHP_EOL;
 		foreach ($event['taks'] as $tak) {
 			echo '<h4>'.$tak['title'].($tak['voice']?(', '._("глас").' '.$tak['voice']):'').'</h4>'.PHP_EOL;
