@@ -15,11 +15,16 @@
 
 <style>
 	body {
+		font-family: Geneva, Arial, Helvetica, sans-serif;
 		font-size: 1.2em;
 	}
 	.container {
+	  display: flex;
+	  justify-content: center;
+	}
+	.main {
 		display: block;
-		width: 640px;
+		width: 34%;
 		margin: 0;
 		padding: 0;
 		font-size: 100%;
@@ -28,6 +33,7 @@
 		width: 100%; 
 		text-align: center;
 		font-size: 100%;
+		margin-bottom: 0.5em;
 	}
 	.calendar {
 		width: 100%; 
@@ -44,6 +50,12 @@
 		text-align:left;
 		font-size: 100%;
 	}
+	.footer {
+		width: 100%; 
+		text-align:left;
+		font-size: 80%;
+		color: #333;
+	}
 	details {
 		width: 100%;
 	}
@@ -54,9 +66,9 @@
 	hr {
 		margin:0;
 	}
-	#bg_bible_text {
+	.bg_content {
 		background-color: #eee;
-		padding: 0;
+		padding: 0 0.5em;
 		margin: 0;
 	}
 	div.bg_hide_block {
@@ -71,12 +83,21 @@
 		text-decoration: underline;
 	}
 
-	@media screen and (max-width: 1280px) {
-		.container {
+	details.data {
+		display: none;
+	}
+	
+	@media screen and (max-width: 960px) {
+		.main {
 			width: 100%;
 		}
-		details.data {
-			display: none;
+		input {
+			font-size:100%;
+			color: darkred;
+		}
+		input#bg_setDay {
+			min-width: calc(100% - 20px);
+			float: left;
 		}
 	}
 	
@@ -84,6 +105,7 @@
 </head>
 <body>
 <div class="container">
+<section class="main">
 <?php
 /*
 // Устанавливаем английский язык
@@ -129,10 +151,10 @@ $data = bg_getData($old_y);
 ?>
 <!-- Выбор даты -->	
 	<div class="day-settings-today">
-		<input id="bg_yesterdayButton" type="button" value="< <?php echo _("Вчера"); ?>">
+		<input id="bg_yesterdayButton" type="button" value="&#9204; <?php echo _("Вчера"); ?>">
 		<input id="bg_setDay" class="bg_setDay" type="date" value="<?php echo  $date; ?>" title="<?php echo _("Выбрать дату"); ?>"> 
 		<input id="bg_todayButton" type="button" value="<?php echo _("Сегодня"); ?>">
-		<input id="bg_tommorowButton" type="button" value="<?php echo _("Завтра"); ?> >">
+		<input id="bg_tommorowButton" type="button" value="<?php echo _("Завтра"); ?> &#9205;">
 	</div>
 	
 	<details class="data"><summary><?php echo _("Данные дня"); ?></summary>
@@ -140,7 +162,7 @@ $data = bg_getData($old_y);
 			<?php print_r($data[$date]); ?>
 		</pre>
 	</details>
-	<hr>	
+	
 	<div class="calendar">
 	<!-- Икона дня -->
 		<img height="250" src="https://azbyka.ru/days/storage/images/<?php echo $data[$date]['icon']; ?>" title="<?php echo $data[$date]['icon_title']; ?>" alt="<?php echo $data[$date]['icon_title']; ?>" />
@@ -183,7 +205,7 @@ for ($i=1; $i<6; $i++) {
 ********************************************************/
 // Тип литургии 
 	$liturgy = [_("Нет литургии.") ,_("Литургия свт. Иоанна Златоуста."), _("Литургия свт. Василия Великого."), _("Литургия Преждеосвященных Даров.")];
-	echo '<p>'.$liturgy[$data[$date]['liturgy']].'</p>';
+	echo '<h5>'.$liturgy[$data[$date]['liturgy']].'</h5>';
 
 // Список чтений дня
 	// Праздники
@@ -217,7 +239,7 @@ for ($i=1; $i<6; $i++) {
 ?>
 	</div>
 <!-- Текст Библии -->
-	<div id="bg_bible_text">
+	<div id="bg_bible_text" class="bg_content">
 	<?php 
 		$ref = $_POST["ref"];
 		if (!empty($ref)) {
@@ -246,11 +268,12 @@ for ($i=1; $i<6; $i++) {
 	$event = bg_tropary_days ($date);
 	if (!empty($event['taks']) && !empty($event['taks'][0])) {
 		echo '<details><summary>'._("Тропари и кондаки дня").'</summary>'.PHP_EOL;
+		echo '<div class="bg_content"><hr>'.PHP_EOL;
 		foreach ($event['taks'] as $tak) {
 			echo '<h4>'.$tak['title'].($tak['voice']?(', '._("глас").' '.$tak['voice']):'').'</h4>'.PHP_EOL;
 			echo '<p>'.$tak['text'].'</p>'.PHP_EOL;
 		}
-		echo '</details>'.PHP_EOL;
+		echo '<hr></div></details>'.PHP_EOL;
 	}
  
 	// Тропари и кондаки событий календаря
@@ -259,11 +282,12 @@ for ($i=1; $i<6; $i++) {
 			$title = $event['taks'][0]['title'];	// В заголовок выносим название первой записи без первого слова (Тропарь)
 			$title = count(explode(' ',$title,2))>1?explode(' ',$title,2)[1]:'';
 			echo '<details><summary>'.$title.'</summary>'.PHP_EOL;
+			echo '<div class="bg_content"><hr>'.PHP_EOL;
 			foreach ($event['taks'] as $tak) {
 				echo '<h4>'.$tak['title'].($tak['voice']?(', '._("глас").' '.$tak['voice']):'').'</h4>'.PHP_EOL;
 				echo '<p>'.$tak['text'].'</p>'.PHP_EOL;
 			}
-			echo '</details>'.PHP_EOL;
+		echo '<hr></div></details>'.PHP_EOL;
 		}
 	}
 ?>		
@@ -334,8 +358,12 @@ for ($i=1; $i<6; $i++) {
 			false
 		);
 	});
-	
 </script>
+<div class="footer">
+	<hr>
+	<p>Версия 3.0.3 от 02.05.2023</p>
+</div>	
+</section>
 </div>
 </body>
 </html>
