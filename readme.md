@@ -53,10 +53,10 @@ Version: 3.0
 				[subtype] => *подтип события*
 				[feast_type] => *тип праздника:* our_lord|our_lady|saint
 				[sanctity] => *лик святости*
-				[gender] => *пол:* Мужчина|Женщина
-				[dual_worship] => *служба двум святым:* 0|1
-				[common_tropar] => *есть общий тропарь:* 0|1
-				[blessed] => *есть блаженны:* 0|1
+				[gender] => *пол:* "male"|"female"
+				[dual_worship] => *служба двум святым:* 0|1|2... *(0 - нет, 1,2... - номер пары в текущий день)*
+				[common_tropar] => *есть общий тропарь:* false|true
+				[blessed] => *есть блаженны:* false|true
 				[minea_id] => *ID данных Минеи/Триоди на сайте azbyka.ru/chaso-slov*
 				[taks] => Array
 				  (

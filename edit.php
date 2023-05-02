@@ -136,8 +136,9 @@ $data = bg_getData($old_y);
 				$new_filename = date('Y_m_d_H_i_').$filename;
 				if (copy ($filename, $new_filename)) {
 					file_put_contents($filename, $new_json);
+//					header("Location: ".$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING']); 
 					$message = "Файл ".$filename." сохранен на сервере";
-					echo "<script type='text/javascript'>alert('".$message."');</script>";
+					echo "<script type='text/javascript'>history.back(); alert('".$message."');</script>";
 				}
 			}
 
