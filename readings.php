@@ -42,6 +42,8 @@ function bg_getData($year) {
 	$data = array();
 	// Формируем массив по дням года
 	foreach ($events as $event) {
+		// Если не високосный год по ст.ст., то события 29 февраля переносим на 28-е
+		if ($event['rule'] == '02-29' && $year % 4 != 0) $event['rule'] = '02-28';
 		$dates = bg_get_date_by_rule ($event['rule'], $year);
 		if (!empty($dates)) {
 			foreach ($dates as $date) {
