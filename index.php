@@ -87,6 +87,55 @@
 		display: none;
 	}
 	
+	div.slider {
+		margin: auto;	
+	}
+	
+	#scroll-left,
+	#scroll-right {
+		display: inline-block;
+		height: 270px;  
+		text-align: center;
+		font-weight: bold;
+		color: darkred;
+		opacity: 0.2;
+		cursor: pointer;
+		user-select: none;
+	}
+	#scroll-left div,
+	#scroll-right div {
+		width: 20px;
+		text-align: center;
+		line-height: 270px;
+	}
+	#scroll-left:hover,
+	#scroll-right:hover {
+		opacity: 0.9;
+		background-color: #fafafa;
+	}
+	
+	#icon-pics{
+		display: inline-block;
+		width: 270px;
+		height: 270px;        
+		overflow: hidden;
+		white-space:nowrap;
+		vertical-align: top;
+		scroll-behavior: smooth;
+	}
+	
+	.icon {
+		border-radius: 5px;
+		display: inline-block;
+		vertical-align: top;
+		margin: 0 10px;
+		width: 250px;
+		height:250px;
+	}
+	.icon img {
+		filter: drop-shadow(0px 3px 3px #400a);
+	}
+	
 	@media screen and (max-width: 960px) {
 		.main {
 			width: 100%;
@@ -95,6 +144,8 @@
 			font-size:100%;
 			color: darkred;
 		}
+	}
+	@media screen and (max-width: 480px) {
 		input#bg_setDay {
 			min-width: calc(100% - 20px);
 			float: left;
@@ -151,10 +202,10 @@ $data = bg_getData($old_y);
 ?>
 <!-- Выбор даты -->	
 	<div class="day-settings-today">
-		<input id="bg_yesterdayButton" type="button" value="&#9204; <?php echo _("Вчера"); ?>">
+		<input id="bg_yesterdayButton" type="button" value="&#9666; <?php echo _("Вчера"); ?>">
 		<input id="bg_setDay" class="bg_setDay" type="date" value="<?php echo  $date; ?>" title="<?php echo _("Выбрать дату"); ?>"> 
 		<input id="bg_todayButton" type="button" value="<?php echo _("Сегодня"); ?>">
-		<input id="bg_tommorowButton" type="button" value="<?php echo _("Завтра"); ?> &#9205;">
+		<input id="bg_tommorowButton" type="button" value="<?php echo _("Завтра"); ?> &#9656;">
 	</div>
 	
 	<details class="data"><summary><?php echo _("Данные дня"); ?></summary>
@@ -165,7 +216,23 @@ $data = bg_getData($old_y);
 	
 	<div class="calendar">
 	<!-- Икона дня -->
-		<img height="250" src="https://azbyka.ru/days/storage/images/<?php echo $data[$date]['icon']; ?>" title="<?php echo $data[$date]['icon_title']; ?>" alt="<?php echo $data[$date]['icon_title']; ?>" />
+		<div class="slider">
+		<div id="scroll-left"><div> < </div></div>
+		<div id="icon-pics">
+		<?php 
+		foreach ($data[$date]['events'] as $event) { 
+			if (!empty($event['imgs']))  {
+				$src = 'https://azbyka.ru/days/storage/images/'.$event['imgs'][0];
+				$icon_title = $event['title'];
+		?>
+			<div class="icon"><img height="250" src="<?php echo $src; ?>" title="<?php echo $icon_title; ?>" alt="<?php echo $icon_title; ?>" /></div>
+		<?php 
+			}
+		}
+		?>
+		</div>
+		<div id="scroll-right"><div> > </div></div>
+		</div>
 	<!-- Дата по новому стилю -->
 		<h3<?php echo (($wd==7)?' style=" color:red"':""); ?>><?php echo $weekday[$wd-1].', '. sprintf (_('%1$d %2$s %3$d г.'), (int)$d , $monthes[$m-1] , (int)$y); ?><br>
 	<!-- и по старому стилю -->
@@ -358,10 +425,20 @@ for ($i=1; $i<6; $i++) {
 			false
 		);
 	});
+	
+	const button_left = document.getElementById("scroll-left");
+	const button_right = document.getElementById("scroll-right");
+
+	button_left.onclick = () => {
+	  document.getElementById("icon-pics").scrollLeft -= 276;
+	};
+	button_right.onclick = () => {
+	  document.getElementById("icon-pics").scrollLeft += 276;
+	};
 </script>
 <div class="footer">
 	<hr>
-	<p>Версия 3.0.4 от 04.05.2023</p>
+	<p>Версия 3.1.0 от 06.05.2023</p>
 </div>	
 </section>
 </div>

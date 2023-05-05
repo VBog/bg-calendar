@@ -34,11 +34,14 @@ function bg_getData($year) {
 	
 	// Период триодей в текущем году
 	$triod_period = bg_get_date_by_rule ('0--56,0-56', $year);
-	// Светлая седмица, Вселенские и Димитриевская  родительские субботы, первые 4 дня Великого поста
+	// Светлая седмица, Вселенские и Димитриевская  родительские субботы, первые 4 дня Великого поста, преполовение Великого поста,
 	$easterweek =  bg_get_date_by_rule ('0-0,0-6', $year);
 	$universal_saturday = bg_get_date_by_rule ('0--57;0-48', $year);
 	$dimitry_saturday = bg_get_date_by_rule ('6:10-15;10-19,10-21;10-23,10-25', $year);
-	$lent_start = bg_get_date_by_rule ('0--48,0--45', $year);
+	$lent_start = bg_get_date_by_rule ('0--47,0--44', $year);
+	$lent_half = bg_get_date_by_rule ('0--25', $year);
+	$grand_canon = bg_get_date_by_rule ('0--17', $year);
+	$akathist = bg_get_date_by_rule ('0--15', $year);
 	$data = array();
 	// Формируем массив по дням года
 	foreach ($events as $event) {
@@ -80,25 +83,25 @@ function bg_getData($year) {
 						$data[$newdate]['events'][] = $event;
 					
 				// Первые 4 дня Великого поста праздники переносим на следующую Сб
-					} elseif (in_array($date, bg_get_date_by_rule ('0--47,0--44', $year))) {
+					} elseif (in_array($date, $lent_start)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = bg_get_new_date ('0--43', $year);
 						$data[$newdate]['events'][] = $event;
 
 				// В Ср 4-й седмицы, то есть в преполовение Великого поста праздники переносим на Вт 4-й седмицы
-					} elseif (in_array($date, bg_get_date_by_rule ('0--25', $year))) {
+					} elseif (in_array($date, $lent_half)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'),  $old);
 						$newdate = bg_get_new_date ('0--26', $year);
 						$data[$newdate]['events'][] = $event;
 
 				// В Чт 5-й седмицы — в службу Великого канона праздники переносим на Вт 5-й седмицы
-					} elseif (in_array($date, bg_get_date_by_rule ('0--17', $year))) {
+					} elseif (in_array($date, $grand_canon)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = bg_get_new_date ('0--19', $year);
 						$data[$newdate]['events'][] = $event;
 
 				// В субботу Акафиста (Сб 5-й седмицы) праздники переносим на Неделю 5-ю Великого поста
-					} elseif (in_array($date, bg_get_date_by_rule ('0--15', $year))) {
+					} elseif (in_array($date, $akathist)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = bg_get_new_date ('0--14', $year);
 						$data[$newdate]['events'][] = $event;
