@@ -424,21 +424,21 @@ for ($i=1; $i<6; $i++) {
 			},
 			false
 		);
-	});
-	
-	const button_left = document.getElementById("scroll-left");
-	const button_right = document.getElementById("scroll-right");
+		
+		const button_left = document.getElementById("scroll-left");
+		const button_right = document.getElementById("scroll-right");
 
-	button_left.onclick = () => {
-	  document.getElementById("icon-pics").scrollLeft -= 276;
-	};
-	button_right.onclick = () => {
-	  document.getElementById("icon-pics").scrollLeft += 276;
-	};
+		button_left.onclick = () => {
+		  document.getElementById("icon-pics").scrollLeft -= 276;
+		};
+		button_right.onclick = () => {
+		  document.getElementById("icon-pics").scrollLeft += 276;
+		};
+	});
 </script>
 <div class="footer">
 	<hr>
-	<p>Версия 3.1.0 от 06.05.2023</p>
+	<p>Версия 3.1.1 от 06.05.2023</p>
 </div>	
 </section>
 </div>
