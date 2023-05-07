@@ -78,6 +78,7 @@
 	.bg_hide_block input {
 		margin-right: 1em;
 	}
+	.bg_descriptions,
 	.bg_bibleRef {
 		cursor: help;
 		text-decoration: underline;
@@ -130,10 +131,15 @@
 		vertical-align: top;
 		margin: 0 10px;
 		width: 250px;
-		height:250px;
+		height:230px;
 	}
 	.icon img {
 		filter: drop-shadow(0px 3px 3px #400a);
+	}
+	.icon div {
+		width:250px; 
+		font-size: 60%; 
+		white-space: normal;
 	}
 	
 	@media screen and (max-width: 960px) {
@@ -199,6 +205,12 @@ $tomorrow = date ('Y-m-d', strtotime($date.'+ 1 days'));
 $data = array();
 $data = bg_getData($old_y);
 
+$desc_json = 'descriptions.json';
+if (file_exists($desc_json)) {
+	$json = file_get_contents($desc_json);
+	$descriptions = json_decode($json, true);
+} else $descriptions = array();
+
 ?>
 <!-- Выбор даты -->	
 	<div class="day-settings-today">
@@ -222,11 +234,16 @@ $data = bg_getData($old_y);
 		<?php 
 		foreach ($data[$date]['events'] as $event) { 
 			if (!empty($event['imgs']))  {
-				$src = 'https://azbyka.ru/days/storage/images/'.$event['imgs'][0];
-				$icon_title = $event['title'];
+				$ev ='';
+				foreach($event['imgs'] as $image) {
+					if ($ev == dirname($image)) continue;	// Только 1 икона для святого.
+					$ev = dirname($image);
+					$src = 'https://azbyka.ru/days/storage/images/'.$image;
+					$icon_title = $event['title'];
 		?>
-			<div class="icon"><img height="250" src="<?php echo $src; ?>" title="<?php echo $icon_title; ?>" alt="<?php echo $icon_title; ?>" /></div>
+			<div class="icon"><img height="230" src="<?php echo $src; ?>" title="<?php echo $icon_title; ?>" alt="<?php echo $icon_title; ?>" /><div><?php echo $icon_title; ?></div></div>
 		<?php 
+				}
 			}
 		}
 		?>
@@ -258,11 +275,37 @@ for ($i=1; $i<6; $i++) {
 	foreach ($data[$date]['events'] as $event) {
 		$title = (in_array($event['level'], [1,8]))?('<b>'.$event['title'].'</b>'):$event['title'];
 		$title = '<span'.(($event['level'] < 3)?' style=" color:red"':"").'>'.$title.'</span>';
-		if ($event['priority'] == $i) $text .= (($event['level'] < 7)?('<img src="symbols/S'.$event['level'].'.gif" title="'.$level_name[$event['level']].'" alt="'.$level_name[$event['level']].'" /> '):''). $title.'. ';
+		if ($event['priority'] == $i) {
+			$symbol = ($event['level'] < 7)?('<img src="symbols/S'.$event['level'].'.gif" title="'.$level_name[$event['level']].'" alt="'.$level_name[$event['level']].'" /> '):'';
+			if (!empty($descriptions) && array_key_exists($event['id_list'], $descriptions)) { 
+				$desc_img = ' <span class="bg_descriptions" data-desc="'.$event['id_list'].'"><img src="symbols/L.gif" title="Житие" alt="Житие" /></span>';
+			} else $desc_img = '';
+			$text .= $symbol. $title.$desc_img.'. ';
+		}
 	}
 	if ($text) echo '<p>'.$text.'</p>';
 }
 ?>
+	</div>
+<!-- Текст Жития -->
+	<div id="bg_desc_text" class="bg_content">
+	<?php 
+		$desc = $_POST["desc"];
+		$text = '';
+		if (!empty($desc)) {
+			foreach ($descriptions[$desc] as $description) {
+				$text .= '<h4>'.$description['title'].'</h4>';			// Заголовок Жития
+				$text .= '<p>'.$description['text'].'</p>';				// Текст Жития
+			}
+	?>
+		<hr>
+		<div class="bg_hide_block">
+			<input id="bg_hide_block1" type="button" value="<?php echo _("Скрыть"); ?>">
+		</div>
+	<?php
+			echo $text.'<br>'; 
+		}
+	?>
 	</div>
 	<hr>
 	<div class='readings'>
@@ -316,7 +359,7 @@ for ($i=1; $i<6; $i++) {
 	?>
 		<hr>
 		<div class="bg_hide_block">
-			<input id="bg_hide_block" type="button" value="<?php echo _("Скрыть"); ?>">
+			<input id="bg_hide_block2" type="button" value="<?php echo _("Скрыть"); ?>">
 		</div>
 	<?php
 			echo $text.'<br>'; 
@@ -360,6 +403,12 @@ for ($i=1; $i<6; $i++) {
 ?>		
 	</div>
 <!-- Завершение страницы -->	
+<div class="footer">
+	<hr>
+	<p>Версия 3.2 от 07.05.2023</p>
+</div>	
+</section>
+</div>
 <script>
 	// Получить дату из input типа date и добавить ее в параметр адресной строки
 	var bg_setDay = document.getElementById("bg_setDay");
@@ -387,9 +436,15 @@ for ($i=1; $i<6; $i++) {
 		setParam(true);
 	}, false);
 
+	// Очистить div с текстом Жития
+	var bg_hide_block1 = document.getElementById("bg_hide_block1");
+	if (bg_hide_block1) bg_hide_block1.addEventListener('click', function() {
+		document.getElementById("bg_desc_text").innerHTML='';
+	}, false);
+
 	// Очистить div с текстом Библии
-	var bg_hide_block = document.getElementById("bg_hide_block");
-	if (bg_hide_block) bg_hide_block.addEventListener('click', function() {
+	var bg_hide_block2 = document.getElementById("bg_hide_block2");
+	if (bg_hide_block2) bg_hide_block2.addEventListener('click', function() {
 		document.getElementById("bg_bible_text").innerHTML='';
 	}, false);
 	
@@ -403,9 +458,33 @@ for ($i=1; $i<6; $i++) {
 		}
 		location.href=url;
 	}
+
+	// Отправляем POST запрос с ссылкой на Жития 
+	var els1 = document.getElementsByClassName("bg_descriptions");
+	Array.prototype.forEach.call(els1, function(el) {
+		el.addEventListener("click",
+			function() {
+				var url=location.href;
+				var xhr = new XMLHttpRequest();
+				xhr.open("POST", url, false);
+				xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				xhr.onreadystatechange = function() {
+					if (this.readyState != 4) return;
+//					location.reload();
+					document.body.innerHTML = '';
+					document.write(xhr.responseText);				
+					return false;
+				}
+				var desc = el.getAttribute('data-desc');
+				xhr.send("desc="+desc);
+			},
+			false
+		);
+	});
+
 	// Отправляем POST запрос с ссылкой на Библию 
-	var els = document.getElementsByClassName("bg_bibleRef");
-	Array.prototype.forEach.call(els, function(el) {
+	var els2 = document.getElementsByClassName("bg_bibleRef");
+	Array.prototype.forEach.call(els2, function(el) {
 		el.addEventListener("click",
 			function() {
 				var url=location.href;
@@ -424,24 +503,18 @@ for ($i=1; $i<6; $i++) {
 			},
 			false
 		);
-		
-		const button_left = document.getElementById("scroll-left");
-		const button_right = document.getElementById("scroll-right");
-
-		button_left.onclick = () => {
-		  document.getElementById("icon-pics").scrollLeft -= 276;
-		};
-		button_right.onclick = () => {
-		  document.getElementById("icon-pics").scrollLeft += 276;
-		};
 	});
+	
+	var button_left = document.getElementById("scroll-left");
+	var button_right = document.getElementById("scroll-right");
+
+	button_left.onclick = () => {
+	  document.getElementById("icon-pics").scrollLeft -= 276;
+	};
+	button_right.onclick = () => {
+	  document.getElementById("icon-pics").scrollLeft += 276;
+	};
 </script>
-<div class="footer">
-	<hr>
-	<p>Версия 3.1.1 от 06.05.2023</p>
-</div>	
-</section>
-</div>
 </body>
 </html>
 <?php

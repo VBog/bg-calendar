@@ -13,7 +13,7 @@ include_once ('sedmica.php');
 	$year - год в формате YYYY по старому стилю
 	
 *******************************************************************************/  
-function bg_getData($year) {
+function bg_getData($year, $file='calendar.json') {
 	
 	$wd_name = [_("за понедельник"),_("за вторник"),_("за среду"),_("за четверг"),_("за пятницу"),_("за субботу"),_("за Неделю")];
 	
@@ -26,8 +26,8 @@ function bg_getData($year) {
 	}	
 */
 	$locale = setlocale(LC_ALL, 0);
-	$calendar_json = './locale/'.$locale.'/DATA/calendar.json';
-	if (!file_exists($calendar_json)) $calendar_json = 'calendar.json';
+	$calendar_json = './locale/'.$locale.'/DATA/'.$file;
+	if (!file_exists($calendar_json)) $calendar_json = $file;
 	
 	$json = file_get_contents($calendar_json);
 	$events = json_decode($json, true);

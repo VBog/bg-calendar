@@ -37,7 +37,7 @@ list($old_y,$old_m,$old_d) = explode ('-', $old);
 $tomorrow = date ('Y-m-d', strtotime($date.'+ 1 days'));
 
 $data = array();
-$data = bg_getData($old_y);
+$data = bg_getData($old_y, $filename);
 
 ?>
 <!DOCTYPE html>
