@@ -18,13 +18,13 @@ function bg_getData($year, $file='calendar.json') {
 	$wd_name = [_("за понедельник"),_("за вторник"),_("за среду"),_("за четверг"),_("за пятницу"),_("за субботу"),_("за Неделю")];
 	
 	$filename = 'data/'.$year.'.json';
-/*
+
 	if (file_exists($filename)) {
 		$json = file_get_contents($filename);
 		$data = json_decode($json, true);
 		return $data;
 	}	
-*/
+/**/
 	$locale = setlocale(LC_ALL, 0);
 	$calendar_json = './locale/'.$locale.'/DATA/'.$file;
 	if (!file_exists($calendar_json)) $calendar_json = $file;
