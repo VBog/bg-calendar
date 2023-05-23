@@ -86,7 +86,9 @@ function add_event (e) {
 // Проверка json на валидность
 function json_validate(e) {
 	var el = e.parentNode.parentNode;
-	var str = e.parentNode.querySelector('textarea').value;
+//	var str = e.parentNode.querySelector('textarea').value;
+	var editor = e.parentNode.querySelector('.CodeMirror').CodeMirror;
+	var str = editor.getValue();
 	var summary = e.parentNode.querySelector('summary');
 	try {
 		var event = JSON.parse(str);

@@ -17,21 +17,21 @@ function bg_getData($year, $file='calendar.json') {
 	
 	$wd_name = [_("за понедельник"),_("за вторник"),_("за среду"),_("за четверг"),_("за пятницу"),_("за субботу"),_("за Неделю")];
 	
-	$filename = 'data/'.$year.'.json';
-
+	$filename = dirname(__FILE__).'/data/'.$year.'.json';
+/*
 	if (file_exists($filename)) {
 		$json = file_get_contents($filename);
 		$data = json_decode($json, true);
 		return $data;
 	}	
-/**/
+*/
 	$locale = setlocale(LC_ALL, 0);
-	$calendar_json = './locale/'.$locale.'/DATA/'.$file;
-	if (!file_exists($calendar_json)) $calendar_json = $file;
-	
+	$calendar_json = dirname(__FILE__).'/locale/'.$locale.'/DATA/'.$file;
+	if (!file_exists($calendar_json)) $calendar_json = dirname(__FILE__).'/'.$file;
+		
 	$json = file_get_contents($calendar_json);
 	$events = json_decode($json, true);
-	
+
 	// Период триодей в текущем году
 	$triod_period = bg_get_date_by_rule ('0--56,0-56', $year);
 	// Светлая седмица, Вселенские и Димитриевская  родительские субботы, первые 4 дня Великого поста, преполовение Великого поста,
@@ -118,40 +118,37 @@ function bg_getData($year, $file='calendar.json') {
 
 	// Дополним массив данных по дням дополнительной информацией
 	foreach ($data as $date => $value) {
-		// Особый день
+		$festivity_ind = '';		// Празднество
+		$special_ind = '';		// Особый день
 		$day_type = '';
 		$day_subtype = '';
-		$afterfeast = '';
+		$tipicon_events = array(); 
+
 		// Найдем главный праздник и икону дня
-		$ev = $value['events'][0];
+		$main_ind = 0;
+		$ev = $value['events'][0];						// Первый элемент в списке
 		$main_level = $ev['level'];
 		$main_type = $ev['type'];
 		$main_subtype = $ev['subtype'];
 		$main_feast_type = $ev['feast_type'];
 		$icon = (!empty($ev['imgs']))?$ev['imgs'][0]:'';
 		$icon_title = $ev['title'];
-		foreach ($value['events'] as $event) {
+		
+		foreach ($value['events'] as $key => $event) {
 			// Если особая Неделя или родительская суббота
 			if (in_array($event['type'], ['weekend', 'memorial', 'eve'] )) {
+				$special_ind = $key;
 				$day_type = $event['type'];
 				$day_subtype = $event['subtype'];
-				// Если вселенская родительская суббота или навечерие, то это главный праздник
-				if (in_array($day_subtype, ['universal_saturday', 'eve'] )) {
-					$main_level = $event['level'];
-					$main_type = $event['type'];
-					$main_subtype = $event['subtype'];
-					$main_feast_type = $event['feast_type'];
-					if (!empty($event['imgs'])) {
-						$icon_title = $event['title'];
-						$icon = $event['imgs'][0];
-					}
-					break;
-				}
-			} elseif (in_array($event['subtype'], ['', 'feastend'] )) {
-				$afterfeast = $event['subtype'];
-				break;
+			} elseif (in_array($event['type'], ['festivity'] )) {
+				$festivity_ind = $key;
+			} elseif ($event['priority'] == 1) {
+				$tipicon_events[] = $key;
 			}
+			
+			// Главный праздник 
 			if ($main_level > $event['level']) {
+				$main_ind = $key;
 				$main_level = $event['level'];
 				$main_type = $event['type'];
 				$main_subtype = $event['subtype'];
@@ -160,6 +157,19 @@ function bg_getData($year, $file='calendar.json') {
 					$icon_title = $event['title'];
 					$icon = $event['imgs'][0];
 				}
+			}
+		}
+		// Если вселенская родительская суббота или навечерие, то это главный праздник
+		if (in_array($day_subtype, ['universal_saturday', 'eve'] )) {
+			$main_ind = $special_ind;
+			$event = $value['events'][$special_ind];
+			$main_level = $event['level'];
+			$main_type = $event['type'];
+			$main_subtype = $event['subtype'];
+			$main_feast_type = $event['feast_type'];
+			if (!empty($event['imgs'])) {
+				$icon_title = $event['title'];
+				$icon = $event['imgs'][0];
 			}
 		}
 		
@@ -174,6 +184,18 @@ function bg_getData($year, $file='calendar.json') {
 			}
 		}
 		
+		// Второе событие дня (по умолчанию - нет)
+		$second_ind = '';
+		if ($value['events'][$main_ind]['dual_worship'] > 0) {	// Двойной праздник
+			foreach ($value['events'] as $key => $event) {
+				// Одинаковый номер пары и другой id 
+				if ($event['dual_worship'] == $value['events'][$main_ind]['dual_worship'] && $key != $main_ind) {
+					$second_ind = $key;
+					break;
+				}
+			}
+		}
+		
 		// Тип литургии
 		if (is_ioann_zlatoust ($date)) $liturgy = 1;
 		elseif (is_vasiliy_velikiy($date)) $liturgy = 2;
@@ -181,15 +203,20 @@ function bg_getData($year, $file='calendar.json') {
 		else $liturgy = 0;
 
 		// Добавляем в БД основные параметры дня
-		$data[$date]['afterfeast'] = $afterfeast;			// Попразднство
+		$data[$date]['festivity_ind'] = $festivity_ind;		// Пред-/Попразднство (индекс)
+		$data[$date]['special_ind'] = $special_ind;			// Особый день (индекс)
 		$data[$date]['day_type'] = $day_type;				// Тип особого дня
 		$data[$date]['day_subtype'] = $day_subtype;			// Подтип особого дня
+		$data[$date]['main_ind'] = $main_ind;				// Главное событие дня (индекс)
 		$data[$date]['main_level'] = $main_level;			// Уровень главного события дня
 		$data[$date]['main_type'] = $main_type;				// Тип главного события дня
 		$data[$date]['main_subtype'] = $main_subtype;		// Подтип главного события дня
 		$data[$date]['main_feast_type'] = $main_feast_type;	// Тип принадлежности главного события дня
+		$data[$date]['second_ind'] = $second_ind;			// Второе событие дня (индекс)
+		$data[$date]['tipicon_events'] = $tipicon_events;	// Службы по Типикону
 		$data[$date]['icon'] = $icon;						// Икона дня
 		$data[$date]['icon_title'] = $icon_title;			// Название иконы дня
+		
 	
 		$data[$date]['liturgy'] = $liturgy;					// Тип литургии
 		$data[$date]['sedmica'] = bg_sedmica ($date);		// Название седмицы/Недели
@@ -269,6 +296,8 @@ function bg_getData($year, $file='calendar.json') {
 		} else $readings[] = (array) $or->bg_day_readings ($date, '');
 
 		$data[$date]['ordinary_readings'] = $readings;		// Рядовые чтения
+		$data[$date] = array_slice($data[$date], 1, count($data[$date])-1, true) + array('events' => $data[$date]['events']);
+		
 	}
 
 	$json = json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -358,8 +387,8 @@ function bg_tropary_days ($date) {
 	}
 		
 	$locale = setlocale(LC_ALL, 0);
-	$tropary_json = './locale/'.$locale.'/DATA/tropary.json';
-	if (!file_exists($tropary_json)) $tropary_json = 'tropary.json';
+	$tropary_json = dirname(__FILE__).'/locale/'.$locale.'/DATA/tropary.json';
+	if (!file_exists($tropary_json)) $tropary_json = dirname(__FILE__).'/tropary.json';
 	
 	$json = file_get_contents($tropary_json);
 	$tropary = json_decode($json, true);
