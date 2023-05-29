@@ -4,7 +4,7 @@
 */
 include_once ('bg_ordered_readings.php');
 include_once ('sedmica.php');
-
+	
 /*******************************************************************************
 	
 	Функция получает базу данных календаря из файла json
@@ -62,13 +62,13 @@ function bg_getData($year, $file='calendar.json') {
 				if (in_array($date, $triod_period) && $event['level'] > 3 && $event['level'] != 8) {
 					$event['readings'] = array();
 
-				// На Светлой седмице нет праздников святых
-				} elseif (in_array($date, $easterweek) && $event['level'] > 1 && $event['level'] != 8) {
+				// На Светлой седмице только бденные праздники
+				} elseif (in_array($date, $easterweek) && $event['level'] > 2 && $event['level'] != 8) {
 					$event['readings'] = array();
 				}
 				
-			// Переносим праздники
-				if (!empty($event['readings']) && (($event['level'] > 1 && $event['level'] != 8) || in_array($event['subtype'],['prefeast']))) {
+			// Переносим праздники (кроме Двунадесятых, Великих и бденных, а также особых дней)
+				if (!empty($event['readings']) && (($event['level'] > 2 && $event['level'] != 8) || in_array($event['subtype'],['prefeast']))) {
 					
 				// Во Вселенские родительские субботы праздники переносим на предыдущий Чт
 					if (in_array($date, $universal_saturday)) {
@@ -119,78 +119,91 @@ function bg_getData($year, $file='calendar.json') {
 	// Дополним массив данных по дням дополнительной информацией
 	foreach ($data as $date => $value) {
 		$festivity_ind = '';		// Празднество
-		$special_ind = '';		// Особый день
+		$special_ind = '';			// Особый день
 		$day_type = '';
 		$day_subtype = '';
 		$tipicon_events = array(); 
 
-		// Найдем главный праздник и икону дня
-		$main_ind = 0;
-		$ev = $value['events'][0];						// Первый элемент в списке
-		$main_level = $ev['level'];
-		$main_type = $ev['type'];
-		$main_subtype = $ev['subtype'];
-		$main_feast_type = $ev['feast_type'];
-		$icon = (!empty($ev['imgs']))?$ev['imgs'][0]:'';
-		$icon_title = $ev['title'];
-		
+		// Сортируем события по специальным группам
 		foreach ($value['events'] as $key => $event) {
-			// Если особая Неделя или родительская суббота
-			if (in_array($event['type'], ['weekend', 'memorial', 'eve'] )) {
+		// Пред-/попразднство
+			if ($event['type'] == 'festivity') {
+				$festivity_ind = $key;
+		// Особый день
+			} elseif ($event['type'] != 'event') {
 				$special_ind = $key;
 				$day_type = $event['type'];
 				$day_subtype = $event['subtype'];
-			} elseif (in_array($event['type'], ['festivity'] )) {
-				$festivity_ind = $key;
-			} elseif ($event['priority'] == 1) {
+		// Есть служба, если есть данные в Минеи/Триоди
+			} elseif (!empty($event['minea_id'])) {
 				$tipicon_events[] = $key;
 			}
-			
-			// Главный праздник 
-			if ($main_level > $event['level']) {
-				$main_ind = $key;
-				$main_level = $event['level'];
-				$main_type = $event['type'];
-				$main_subtype = $event['subtype'];
-				$main_feast_type = $event['feast_type'];
-				if (!empty($event['imgs'])) {
-					$icon_title = $event['title'];
-					$icon = $event['imgs'][0];
-				}
-			}
 		}
-		// Если вселенская родительская суббота или навечерие, то это главный праздник
-		if (in_array($day_subtype, ['universal_saturday', 'eve'] )) {
+		
+		// Если вселенская родительская суббота или навечерие, или воскресный день в период Триодей
+		// то это главный праздник
+		if (in_array($day_subtype, ['universal_saturday', 'eve', 'sunday', 'sunday_before', 'sunday_after'] )) {
 			$main_ind = $special_ind;
 			$event = $value['events'][$special_ind];
 			$main_level = $event['level'];
 			$main_type = $event['type'];
 			$main_subtype = $event['subtype'];
 			$main_feast_type = $event['feast_type'];
+			$main_rank = 0;
 			if (!empty($event['imgs'])) {
 				$icon_title = $event['title'];
 				$icon = $event['imgs'][0];
 			}
+		
+		} elseif (sizeof($tipicon_events)) {
+			// Найдем главный праздник и икону дня
+			$main_ind = $tipicon_events[0];
+			$ev = $value['events'][$main_ind];				// Первый элемент в списке
+			$main_level = $ev['level'];
+			$main_type = $ev['type'];
+			$main_subtype = $ev['subtype'];
+			$main_feast_type = $ev['feast_type'];
+			$main_rank = intval($main_feast_type.$main_level);
+			$icon = (!empty($ev['imgs']))?$ev['imgs'][0]:'';
+			$icon_title = $ev['title'];
+			
+			foreach ($tipicon_events as $key) {
+				$event = $value['events'][$key];
+				// Главный праздник 
+				$rank = intval($event['feast_type'].$event['level']);
+				if ($main_rank > $rank) {
+					$main_ind = $key;
+					$main_level = $event['level'];
+					$main_type = $event['type'];
+					$main_subtype = $event['subtype'];
+					$main_feast_type = $event['feast_type'];
+					$main_rank = intval($main_feast_type.$main_level);
+					if (!empty($event['imgs'])) {
+						$icon_title = $event['title'];
+						$icon = $event['imgs'][0];
+					}
+				}
+			}
+			// Второе событие дня (по умолчанию - нет)
+			$second_ind = '';
+			if (!empty($main_ind) && $value['events'][$main_ind]['dual_worship'] > 0) {	// Двойной праздник
+				foreach ($value['events'] as $key => $event) {
+					// Одинаковый номер пары и другой id 
+					if ($event['dual_worship'] == $value['events'][$main_ind]['dual_worship'] && $key != $main_ind) {
+						$second_ind = $key;
+						break;
+					}
+				}
+			}
+		
 		}
 		
 		// Если у главного праздника нет иконы, то найдем первую в списке
-		if (!$icon) {
+		if (empty($icon)) {
 			foreach ($value['events'] as $event) {
 				if (!empty($event['imgs'])) {
 					$icon_title = $event['title'];
 					$icon = $event['imgs'][0];
-					break;
-				}
-			}
-		}
-		
-		// Второе событие дня (по умолчанию - нет)
-		$second_ind = '';
-		if ($value['events'][$main_ind]['dual_worship'] > 0) {	// Двойной праздник
-			foreach ($value['events'] as $key => $event) {
-				// Одинаковый номер пары и другой id 
-				if ($event['dual_worship'] == $value['events'][$main_ind]['dual_worship'] && $key != $main_ind) {
-					$second_ind = $key;
 					break;
 				}
 			}
@@ -203,25 +216,27 @@ function bg_getData($year, $file='calendar.json') {
 		else $liturgy = 0;
 
 		// Добавляем в БД основные параметры дня
-		$data[$date]['festivity_ind'] = $festivity_ind;		// Пред-/Попразднство (индекс)
-		$data[$date]['special_ind'] = $special_ind;			// Особый день (индекс)
-		$data[$date]['day_type'] = $day_type;				// Тип особого дня
-		$data[$date]['day_subtype'] = $day_subtype;			// Подтип особого дня
-		$data[$date]['main_ind'] = $main_ind;				// Главное событие дня (индекс)
-		$data[$date]['main_level'] = $main_level;			// Уровень главного события дня
-		$data[$date]['main_type'] = $main_type;				// Тип главного события дня
-		$data[$date]['main_subtype'] = $main_subtype;		// Подтип главного события дня
-		$data[$date]['main_feast_type'] = $main_feast_type;	// Тип принадлежности главного события дня
-		$data[$date]['second_ind'] = $second_ind;			// Второе событие дня (индекс)
-		$data[$date]['tipicon_events'] = $tipicon_events;	// Службы по Типикону
-		$data[$date]['icon'] = $icon;						// Икона дня
-		$data[$date]['icon_title'] = $icon_title;			// Название иконы дня
+		$data[$date]['festivity_ind'] = $festivity_ind ?? '';		// Пред-/Попразднство (индекс)
+		$data[$date]['special_ind'] = $special_ind ?? '';			// Особый день (индекс)
+		$data[$date]['day_type'] = $day_type ?? '';					// Тип особого дня
+		$data[$date]['day_subtype'] = $day_subtype ?? '';			// Подтип особого дня
+		$data[$date]['main_ind'] = $main_ind ?? '';					// Главное событие дня (индекс)
+		$data[$date]['main_level'] = $main_level ?? '';				// Уровень главного события дня
+		$data[$date]['main_type'] = $main_type ?? '';				// Тип главного события дня
+		$data[$date]['main_subtype'] = $main_subtype ?? '';			// Подтип главного события дня
+		$data[$date]['main_feast_type'] = $main_feast_type ?? '';	// Тип принадлежности главного события дня
+		$data[$date]['main_rank'] = $main_rank ?? '';				// Ранг события
+
+		$data[$date]['second_ind'] = $second_ind ?? '';				// Второе событие дня (индекс)
+		$data[$date]['tipicon_events'] = $tipicon_events ?? '';		// Службы по Типикону
+		$data[$date]['icon'] = $icon ?? '';							// Икона дня
+		$data[$date]['icon_title'] = $icon_title ?? '';				// Название иконы дня
 		
 	
-		$data[$date]['liturgy'] = $liturgy;					// Тип литургии
-		$data[$date]['sedmica'] = bg_sedmica ($date);		// Название седмицы/Недели
-		$data[$date]['tone'] = bg_getTone ($date);			// Глас Октоиха
-		$data[$date]['food'] = bg_getFood ($date);			// Рекомендации пищи
+		$data[$date]['liturgy'] = $liturgy;							// Тип литургии
+		$data[$date]['sedmica'] = bg_sedmica ($date);				// Название седмицы/Недели
+		$data[$date]['tone'] = bg_getTone ($date);					// Глас Октоиха
+		$data[$date]['food'] = bg_getFood ($date);					// Рекомендации пищи
 		
 	}
 	ksort($data);		// Сортируем по датам
@@ -245,7 +260,7 @@ function bg_getData($year, $file='calendar.json') {
 		if (empty($data[$date]['afterfeast']) &&												// НЕ попразднство
 			$date < bg_get_new_date ('0--48', $y) || bg_get_new_date ('0-49', $y) < $date ) { 	// Только в период Октоиха 
 																									// Если сегодня:
-			if (!($data[$date]['main_level'] <= 2 && $data[$date]['main_feast_type'] == 'our_lord') && 	// НЕ господский,
+			if (!($data[$date]['main_level'] <= 2 && $data[$date]['main_feast_type'] == '1') && 	// НЕ господский,
 				!($data[$date]['main_level'] <= 2 && $wd < 7) &&										// и НЕ Великий и Бденный в будни
 				$date != bg_get_new_date ('09-01', $y) &&												// и НЕ Новолетие
 				$data[$date]['main_type'] != 'eve') {													// и НЕ Навечерие
@@ -255,13 +270,13 @@ function bg_getData($year, $file='calendar.json') {
 				// Вчера Великий или бденный праздник и сегодня вторник
 				// или со вторника по субботу и позавчера Великий или бденный праздник
 				if (!empty($data[$yesterday]) && 																	// Вчера: 
-					(($data[$yesterday]['main_level'] <= 2 && $data[$yesterday]['main_feast_type'] == 'our_lord') || 	// Господский,
+					(($data[$yesterday]['main_level'] <= 2 && $data[$yesterday]['main_feast_type'] == '1') || 	// Господский,
 						($data[$yesterday]['main_level'] <= 2 && $wd_y < 7) ||											// или Великий и Бденный в будни
 						$data[$yesterday]['main_type'] == 'eve') &&														// или Навечерие
 					($wd == 2 || 																					// и сегодня Вторник
 					($wd > 1 && $wd < 7 && 																			// или сегодня Вт,Ср,Чт,Пт или Сб
 					!empty($data[$before_yesterday]) && 																	// и позавчера: 
-					(($data[$before_yesterday]['main_level'] <= 2 && $data[$before_yesterday]['main_feast_type'] == 'our_lord') || 	// Господский,
+					(($data[$before_yesterday]['main_level'] <= 2 && $data[$before_yesterday]['main_feast_type'] == '1') || 	// Господский,
 						($data[$before_yesterday]['main_level'] <= 2 && $wd_by < 7) ||												// или Великий или Бденный в будни
 						$data[$before_yesterday]['main_type'] == 'eve')))) {														// или Навечерие
 				
@@ -280,7 +295,7 @@ function bg_getData($year, $file='calendar.json') {
 
 				// Будни и завтра Великий или бденный праздник
 				if ($wd < 6 && !empty($data[$tomorrow]) && 															// Завтра:
-					(($data[$tomorrow]['main_level'] <= 2 && $data[$tomorrow]['main_feast_type'] == 'our_lord') || 		// Господский,
+					(($data[$tomorrow]['main_level'] <= 2 && $data[$tomorrow]['main_feast_type'] == '1') || 		// Господский,
 						($data[$tomorrow]['main_level'] <= 2 && $wd_t < 7) ||											// или Великий или Бденный в будни
 						$tomorrow == bg_get_new_date ('09-01', $y) ||													// или Новолетие
 						$data[$tomorrow]['main_type'] == 'eve')) {														// или Навечерие
@@ -288,7 +303,7 @@ function bg_getData($year, $file='calendar.json') {
 					$readings[] = (array) $or->bg_day_readings ($tomorrow, $wd_name[$wd_t-1]);
 				} 
 			} elseif ($data[$date]['main_level'] <= 2 && $wd == 1 && !empty($data[$tomorrow]) && 					// Сегодня Великий или Бденный, Пн, и Завтра:
-					(($data[$tomorrow]['main_level'] <= 2 && $data[$tomorrow]['main_feast_type'] == 'our_lord') || 		// Господский,
+					(($data[$tomorrow]['main_level'] <= 2 && $data[$tomorrow]['main_feast_type'] == '1') || 		// Господский,
 						($data[$tomorrow]['main_level'] <= 2 && $wd_t < 7) ||											// или Великий и Бденный в будни
 						$data[$tomorrow]['main_type'] == 'eve') ) {														// или Навечерие
 				$readings[] = (array) $or->bg_day_readings ($date, _("Ряд."));					
