@@ -276,9 +276,9 @@ for ($i=1; $i<6; $i++) {
 		$title = (in_array($event['level'], [1,8]))?('<b>'.$event['title'].'</b>'):$event['title'];
 		$title = '<span'.(($event['level'] < 3)?' style=" color:red"':"").'>'.$title.'</span>';
 		if ($event['priority'] == $i) {
-			$symbol = ($event['level'] < 7)?('<img src="symbols/S'.$event['level'].'.gif" title="'.$level_name[$event['level']].'" alt="'.$level_name[$event['level']].'" /> '):'';
+			$symbol = ($event['level'] < 7)?('<img src="symbols/S'.$event['level'].'.gif" title="'.$level_name[$event['level']].'" alt="'.$level_name[$event['level']].'" />&nbsp;'):'';
 			if (!empty($descriptions) && array_key_exists($event['id_list'], $descriptions)) { 
-				$desc_img = ' <a href="#bg_desc_text"><span class="bg_descriptions" data-desc="'.$event['id_list'].'"><img src="symbols/L.gif" title="Житие" alt="Житие" /></span></a>';
+				$desc_img = '&nbsp;<a href="#bg_desc_text"><span class="bg_descriptions" data-desc="'.$event['id_list'].'"><img src="symbols/L.gif" title="Житие" alt="Житие" /></span></a>';
 			} else $desc_img = '';
 			$text .= $symbol. $title.$desc_img.'. ';
 		}
@@ -405,7 +405,7 @@ for ($i=1; $i<6; $i++) {
 <!-- Завершение страницы -->	
 <div class="footer">
 	<hr>
-	<p>Версия 3.5 от 29.05.2023</p>
+	<p>Версия 3.5.1 от 31.05.2023</p>
 </div>	
 </section>
 </div>

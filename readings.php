@@ -123,6 +123,8 @@ function bg_getData($year, $file='calendar.json') {
 		$day_type = '';
 		$day_subtype = '';
 		$tipicon_events = array(); 
+		$icon_title = '';
+		$icon = '';
 
 		// Сортируем события по специальным группам
 		foreach ($value['events'] as $key => $event) {
@@ -142,7 +144,7 @@ function bg_getData($year, $file='calendar.json') {
 		
 		// Если вселенская родительская суббота или навечерие, или воскресный день в период Триодей
 		// то это главный праздник
-		if (in_array($day_subtype, ['universal_saturday', 'eve', 'sunday', 'sunday_before', 'sunday_after'] )) {
+		if ($special_ind != '' && in_array($day_subtype, ['universal_saturday', 'eve', 'sunday', 'sunday_before', 'sunday_after'] )) {
 			$main_ind = $special_ind;
 			$event = $value['events'][$special_ind];
 			$main_level = $event['level'];
@@ -154,9 +156,22 @@ function bg_getData($year, $file='calendar.json') {
 				$icon_title = $event['title'];
 				$icon = $event['imgs'][0];
 			}
+		// Отдание считаем главным праздником это главный праздник
+		} elseif ($festivity_ind != '' && $value['events'][$festivity_ind]['subtype'] == 'feastend') {
+			$main_ind = $festivity_ind;
+			$event = $value['events'][$festivity_ind];
+			$main_level = $event['level'];
+			$main_type = $event['type'];
+			$main_subtype = $event['subtype'];
+			$main_feast_type = $event['feast_type'];
+			$main_rank = 0;
+			if (!empty($event['imgs'])) {
+				$icon_title = $event['title'];
+				$icon = $event['imgs'][0];
+			}
 		
+		// Найдем главный праздник и икону дня в списке праздников Типикона
 		} elseif (sizeof($tipicon_events)) {
-			// Найдем главный праздник и икону дня
 			$main_ind = $tipicon_events[0];
 			$ev = $value['events'][$main_ind];				// Первый элемент в списке
 			$main_level = $ev['level'];
@@ -184,7 +199,8 @@ function bg_getData($year, $file='calendar.json') {
 					}
 				}
 			}
-			// Второе событие дня (по умолчанию - нет)
+			
+		// Второе событие дня (по умолчанию - нет)
 			$second_ind = '';
 			if (!empty($main_ind) && $value['events'][$main_ind]['dual_worship'] > 0) {	// Двойной праздник
 				foreach ($value['events'] as $key => $event) {

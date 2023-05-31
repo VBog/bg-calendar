@@ -8,7 +8,7 @@ License: GPLv2
 
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Version: 3.5
+Version: 3.5.1
 
 Библиотека функций для расчета событий православного календаря (РПЦ)
 
