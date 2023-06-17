@@ -68,7 +68,11 @@ function remove_event (e) {
 	var el = e.parentNode.parentNode;
 	var title = e.parentNode.querySelector('summary').innerText;
 	result = confirm(title+"\r\nДействительно удалить это событие?");
-	if (result) el.remove();				
+	if (result) {
+		el.remove();
+		var ecount = document.getElementById("bg_countEvents").value;
+		document.getElementById("bg_countEvents").value = ecount-1;		
+	}
 }
 
 // Добавить элемент события
@@ -81,6 +85,8 @@ function add_event (e) {
 	el.parentNode.insertBefore(li, el.nextSibling);
 	var details = li.querySelector('details');
 	highlight_json (details);
+	var ecount = document.getElementById("bg_countEvents").value;
+	document.getElementById("bg_countEvents").value = ecount+1;			
 }
 
 // Проверка json на валидность

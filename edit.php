@@ -3,7 +3,14 @@
 
 	Редактор файла данных Православного Календаря
 
+echo 'Максимальный размер данных: ' . ini_get('post_max_size') . '<br>';      
+echo 'Максимальный размер файлов: ' . ini_get('upload_max_filesize') . '<br>'; 
+echo 'Максимальное количество переменных: ' . ini_get('max_input_vars') . '<br>';     
+echo 'Максимальное время выполнения скрипта: ' . ini_get('max_execution_time') . '<br>'; 
+echo 'Максимальное время обработки данных: ' . ini_get('max_input_time') . '<br>';     
+echo 'Память для скрипта: ' . ini_get('memory_limit') . '<br>';   
 ***/
+
 include_once ('functions.php');
 include_once ('readings.php');
 
@@ -131,6 +138,9 @@ $data = bg_getData($old_y, $filename);
 			}
 			if(!empty($errors)) {
 				foreach ($errors as $key => $error) echo '<p>'.'Строка '.$key.'. '.$error.'</p>';
+			} elseif ($_POST["count"] < count($jsons)) {
+				$message = 'Потеря данных: было '.$_POST["count"].', получено '.count($jsons).', загружено '.$j;
+				echo "<script type='text/javascript'>alert('".$message."');</script>";
 			} else {
 				$new_json = json_encode($events, JSON_UNESCAPED_UNICODE);
 				$new_filename = date('Y_m_d_H_i_').$filename;
@@ -145,6 +155,10 @@ $data = bg_getData($old_y, $filename);
 		} else {
 			$json = file_get_contents($filename);
 			$events = json_decode($json, true);
+?>
+			<input type="hidden" id="bg_countEvents" name="count" value="<?php echo count($events); ?>">
+<?php
+			
 		}
 		
 		$data = array();

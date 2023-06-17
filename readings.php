@@ -156,7 +156,7 @@ function bg_getData($year, $file='calendar.json') {
 				$icon_title = $event['title'];
 				$icon = $event['imgs'][0];
 			}
-		// Отдание считаем главным праздником это главный праздник
+		// Отдание считаем главным праздником
 		} elseif ($festivity_ind != '' && $value['events'][$festivity_ind]['subtype'] == 'feastend') {
 			$main_ind = $festivity_ind;
 			$event = $value['events'][$festivity_ind];
@@ -300,7 +300,7 @@ function bg_getData($year, $file='calendar.json') {
 				}
 
 				// Рядовые чтений на сегодня
-				$ordinary = (array) $or->bg_day_readings ($date, _("Ряд."));
+				$ordinary = (array) $or->bg_day_readings ($date, _("рядовое"));
 				if (in_array($data[$date]['day_subtype'], ['sunday_before', 'sunday_after'])) { 
 					$ordinary['apostle'] = '';
 					$ordinary['gospel'] = '';
@@ -322,7 +322,7 @@ function bg_getData($year, $file='calendar.json') {
 					(($data[$tomorrow]['main_level'] <= 2 && $data[$tomorrow]['main_feast_type'] == '1') || 		// Господский,
 						($data[$tomorrow]['main_level'] <= 2 && $wd_t < 7) ||											// или Великий и Бденный в будни
 						$data[$tomorrow]['main_type'] == 'eve') ) {														// или Навечерие
-				$readings[] = (array) $or->bg_day_readings ($date, _("Ряд."));					
+				$readings[] = (array) $or->bg_day_readings ($date, _("рядовое"));					
 			}
 		} else $readings[] = (array) $or->bg_day_readings ($date, '');
 
