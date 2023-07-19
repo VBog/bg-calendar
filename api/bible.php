@@ -66,12 +66,6 @@ $ref = $_POST["ref"];
 if (!empty($ref)) {
 	$text = bg_get_bible ($ref);					// Служебные Апостол и Евангелие
 	if (!$text) $text = bg_get_paremiaes ($ref);	// Служебные Паримии
-?>
-<hr>
-<div class="bg_hide_block">
-	<input id="bg_hide_block2" type="button" value="&#215;" title="<?php echo _("Скрыть"); ?>">
-</div>
-<?php
-	echo $text.'<br>'; 
+	echo $text; 
 }
 exit();

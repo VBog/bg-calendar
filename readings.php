@@ -123,8 +123,16 @@ function bg_getData($year, $file='calendar.json') {
 		$day_type = '';
 		$day_subtype = '';
 		$tipicon_events = array(); 
+		$top_events = array(); 
 		$icon_title = '';
 		$icon = '';
+		$main_ind = '';
+		$main_level = '';
+		$main_type = '';
+		$main_subtype = '';
+		$main_feast_type = '';
+		$main_rank = 0;
+		$second_ind = '';
 
 		// Сортируем события по специальным группам
 		foreach ($value['events'] as $key => $event) {
@@ -136,9 +144,13 @@ function bg_getData($year, $file='calendar.json') {
 				$special_ind = $key;
 				$day_type = $event['type'];
 				$day_subtype = $event['subtype'];
-		// Есть служба, если есть данные в Минеи/Триоди
-			} elseif (!empty($event['minea_id'])) {
-				$tipicon_events[] = $key;
+		// Есть служба, если она имеет знак Типикона или помечена как вседневная
+			} elseif ($event['level'] < 7) {
+				 $tipicon_events[] = $key;
+			}
+		// Рекомендован повышенный уровень службы
+			if (!empty($event['top_level'])) {
+				 $top_events[] = $key;
 			}
 		}
 		
@@ -245,6 +257,7 @@ function bg_getData($year, $file='calendar.json') {
 
 		$data[$date]['second_ind'] = $second_ind ?? '';				// Второе событие дня (индекс)
 		$data[$date]['tipicon_events'] = $tipicon_events ?? '';		// Службы по Типикону
+		$data[$date]['top_events'] = $top_events ?? '';				// Службы, для которых рекомендован повышенный уровень
 		$data[$date]['icon'] = $icon ?? '';							// Икона дня
 		$data[$date]['icon_title'] = $icon_title ?? '';				// Название иконы дня
 		
