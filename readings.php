@@ -8,14 +8,12 @@ include_once ('sedmica.php');
 /*******************************************************************************
 	
 	Функция получает базу данных календаря из файла json
-	и возвращает массив событий для каждого календарного дня указанного года
 	
 	$year - год в формате YYYY по старому стилю
+	$file - имя файла календаря
 	
 *******************************************************************************/  
 function bg_getData($year, $file='calendar.json') {
-	
-	$wd_name = [_("за понедельник"),_("за вторник"),_("за среду"),_("за четверг"),_("за пятницу"),_("за субботу"),_("за Неделю")];
 	
 	$filename = dirname(__FILE__).'/data/'.$year.'.json';
 /*
@@ -31,22 +29,50 @@ function bg_getData($year, $file='calendar.json') {
 		
 	$json = file_get_contents($calendar_json);
 	$events = json_decode($json, true);
+	
+	$data = bg_getDayEvents ($year, $events);
 
+	$json = json_encode($data, JSON_UNESCAPED_UNICODE);
+	file_put_contents($filename, $json);
+	
+	return $data;
+}
+
+/*******************************************************************************
+	
+	Функция возвращает массив событий для каждого календарного дня указанного года
+	
+	$year - год в формате YYYY по старому стилю
+	$events - события календаря
+	
+*******************************************************************************/  
+function bg_getDayEvents ($year, $events) {
+	
+	$wd_name = [_("за понедельник"),_("за вторник"),_("за среду"),_("за четверг"),_("за пятницу"),_("за субботу"),_("за Неделю")];
+	
 	// Период триодей в текущем году
 	$triod_period = bg_get_date_by_rule ('0--56,0-56', $year);
-	// Светлая седмица, Вселенские и Димитриевская  родительские субботы, первые 4 дня Великого поста, преполовение Великого поста,
+	// Светлая седмица
 	$easterweek =  bg_get_date_by_rule ('0-0,0-6', $year);
+	// Вселенские родительские субботы
 	$universal_saturday = bg_get_date_by_rule ('0--57;0-48', $year);
+	// Димитриевская родительская суббота
 	$dimitry_saturday = bg_get_date_by_rule ('6:10-15;10-19,10-21;10-23,10-25', $year);
+	// Первые 4 дня Великого поста (дни Великого покоянного канона)
 	$lent_start = bg_get_date_by_rule ('0--47,0--44', $year);
+	// Преполовение Великого поста
 	$lent_half = bg_get_date_by_rule ('0--25', $year);
+	// День Великого канона (Мариино стояние)
 	$grand_canon = bg_get_date_by_rule ('0--17', $year);
+	// Акафист Пресятой Богородице
 	$akathist = bg_get_date_by_rule ('0--15', $year);
+	
 	$data = array();
 	// Формируем массив по дням года
 	foreach ($events as $event) {
 		// Если не високосный год по ст.ст., то события 29 февраля переносим на 28-е
 		if ($event['rule'] == '02-29' && $year % 4 != 0) $event['rule'] = '02-28';
+		
 		$dates = bg_get_date_by_rule ($event['rule'], $year);
 		if (!empty($dates)) {
 			foreach ($dates as $date) {
@@ -58,8 +84,8 @@ function bg_getData($year, $file='calendar.json') {
 					}, $old);
 				
 			// Отменяем чтения
-				// В период триодей чтения только на полиейные праздники
-				if (in_array($date, $triod_period) && $event['level'] > 3 && $event['level'] != 8) {
+				// В период триодей чтения только на полиейные праздники и на праздники триоди
+				if (in_array($date, $triod_period) && $event['level'] > 3 && $event['level'] != 8 && $event['subtype'] != 'triod') {
 					$event['readings'] = array();
 
 				// На Светлой седмице только бденные праздники
@@ -184,21 +210,24 @@ function bg_getData($year, $file='calendar.json') {
 		
 		// Найдем главный праздник и икону дня в списке праздников Типикона
 		} elseif (sizeof($tipicon_events)) {
+			// По умолчанию: Первый элемент в списке
 			$main_ind = $tipicon_events[0];
-			$ev = $value['events'][$main_ind];				// Первый элемент в списке
+			$ev = $value['events'][$main_ind];				
 			$main_level = $ev['level'];
 			$main_type = $ev['type'];
 			$main_subtype = $ev['subtype'];
 			$main_feast_type = $ev['feast_type'];
 			$main_rank = intval($main_feast_type.$main_level);
-			$icon = (!empty($ev['imgs']))?$ev['imgs'][0]:'';
-			$icon_title = $ev['title'];
+			if (!empty($ev['imgs'])) {
+				$icon_title = $ev['title'];
+				$icon = $ev['imgs'][0];
+			}
 			
+			// Если есть двунадесятый, великий или бденный праздник, то это Главный праздник 
 			foreach ($tipicon_events as $key) {
 				$event = $value['events'][$key];
-				// Главный праздник 
 				$rank = intval($event['feast_type'].$event['level']);
-				if ($main_rank > $rank) {
+				if ($main_rank > $rank && $event['level'] <= 2) {
 					$main_ind = $key;
 					$main_level = $event['level'];
 					$main_type = $event['type'];
@@ -344,11 +373,9 @@ function bg_getData($year, $file='calendar.json') {
 		
 	}
 
-	$json = json_encode($data, JSON_UNESCAPED_UNICODE);
-	file_put_contents($filename, $json);
-	
 	return $data;
 }
+
 /*******************************************************************************
 
 	Функция определяет совершается ли в этот день Литургия Василия Великого
