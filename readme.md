@@ -220,6 +220,28 @@ Version: 3.8.0
 
 Если в адресной строке задан параметр `?date=Y-m-d`, то это значение, иначе текущая дата 
 
+* `bg_сustomDate()` - внешняя функция, позволяющая изменять текущую дату. 
+
+Может быть использована, например, для задания времени начала богослужебного дня:
+
+```php
+function bg_сustomDate () {
+	
+	$user_id = get_current_user_id();
+	if ($user_id) {
+		$your_timezone = get_the_author_meta( 'your_timezone', $user_id );
+		if ($your_timezone) date_default_timezone_set($your_timezone);
+		else date_default_timezone_set('Europe/Moscow');
+		$shift_time = get_the_author_meta( 'shift_time', $user_id );
+	} else date_default_timezone_set('Europe/Moscow');
+
+	if (empty($shift_time)) $shift_time = 'now';
+	$date = date('Y-m-d',  strtotime($shift_time));
+		
+	return $date;
+}
+```
+
 
 `bg_get_new_date ($old, $year)` - вычисляет дату по новому стилю в текущем году
 

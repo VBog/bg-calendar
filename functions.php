@@ -9,6 +9,9 @@
 		$shift - смещение в днях от текущей даты
 	Возвращает:
 		Дата в формате Y-m-d
+		
+	bg_сustomDate() - внешняя функция, позволяющая изменять текущую дату
+	
 *******************************************************************************/  
 function bg_currentDate($shift=0) {
 	$date = '';
@@ -18,7 +21,8 @@ function bg_currentDate($shift=0) {
 	}
 
 	if (!strtotime ($date)) {		// Текущая дата
-		$date = date('Y-m-d', time());
+		if (function_exists('bg_сustomDate')) $date = bg_сustomDate();
+		else $date = date('Y-m-d', time());
 	}
 	
 	if ($shift) {
@@ -157,9 +161,9 @@ function bg_get_date_by_rule ($rules, $year) {
 		дата по новому стилю
 *******************************************************************************/
 function bg_get_new_date ($old, $year) {
-	list($m, $d) = explode ('-', $old, 2);
-	$m = (int) $m;
-	$d = (int) $d;
+	$old_arr = explode ('-', $old, 2);
+	$m = (int) $old_arr[0];
+	$d = (int) $old_arr[1];
 	
 	if ($m == 0) {	// Переходящий праздник
 		 $date = bg_get_easter($year, $d);
