@@ -144,6 +144,8 @@ function bg_getDayEvents ($year, $events) {
 
 	// Дополним массив данных по дням дополнительной информацией
 	foreach ($data as $date => $value) {
+		$wd = date("N",strtotime($date));
+		
 		$festivity_ind = '';		// Празднество
 		$special_ind = '';			// Особый день
 		$day_type = '';
@@ -252,8 +254,17 @@ function bg_getDayEvents ($year, $events) {
 					}
 				}
 			}
-		
 		}
+		// В попразднство в Неделю совмещение служб отменяется
+		if ($wd == 7 && !empty($festivity_ind)) {
+			foreach ($value['events'] as $key => $event) {
+				if ($event['dual_worship'] > 0) {
+					$data[$date]['events'][$key]['dual_worship'] = 0;
+				}
+			}
+			$second_ind = '';
+		} 
+		
 		
 		// Если у главного праздника нет иконы, то найдем первую в списке
 		if (empty($icon)) {
@@ -270,6 +281,7 @@ function bg_getDayEvents ($year, $events) {
 		if (is_ioann_zlatoust ($date)) $liturgy = 1;
 		elseif (is_vasiliy_velikiy($date)) $liturgy = 2;
 		elseif (is_grigoriy_dvoeslov ($date, $main_level <= 3)) $liturgy = 3;
+		elseif (is_grigoriy_dvoeslov ($date, true)) $liturgy = 4;
 		else $liturgy = 0;
 
 		// Добавляем в БД основные параметры дня
