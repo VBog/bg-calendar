@@ -245,7 +245,7 @@ function bg_getDayEvents ($year, $events) {
 			
 		// Второе событие дня (по умолчанию - нет)
 			$second_ind = '';
-			if (!empty($main_ind) && $value['events'][$main_ind]['dual_worship'] > 0) {	// Двойной праздник
+			if (!is_blank($main_ind) && $value['events'][$main_ind]['dual_worship'] > 0) {	// Двойной праздник
 				foreach ($value['events'] as $key => $event) {
 					// Одинаковый номер пары и другой id 
 					if ($event['dual_worship'] == $value['events'][$main_ind]['dual_worship'] && $key != $main_ind) {
@@ -256,7 +256,7 @@ function bg_getDayEvents ($year, $events) {
 			}
 		}
 		// В попразднство в Неделю совмещение служб отменяется
-		if ($wd == 7 && !empty($festivity_ind)) {
+		if ($wd == 7 && !is_blank($festivity_ind)) {
 			foreach ($value['events'] as $key => $event) {
 				if ($event['dual_worship'] > 0) {
 					$data[$date]['events'][$key]['dual_worship'] = 0;
@@ -696,3 +696,12 @@ function blink ($reference, $customLink) {
 	$hlink = substr($hlink,0,-2);
 	return $hlink;
 }
+
+// Пустая переменная (0, 0.0 и '0' - значимые)
+function is_blank ($var) {
+	if (is_object($var)) return $var->isEmpty();
+	if (is_array($var)) return sizeof($var)?false:true;
+	if (empty ($var) && $var != 0 && $var !=0.0 && $var != '0') return true;
+	else return false;
+}
+	

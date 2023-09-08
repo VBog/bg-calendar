@@ -238,7 +238,7 @@ if (file_exists($desc_json)) {
 				foreach($event['imgs'] as $image) {
 					if ($ev == dirname($image)) continue;	// Только 1 икона для святого.
 					$ev = dirname($image);
-					$src = 'https://azbyka.ru/days/storage/images/'.$image;
+					$src = 'https://azbyka.ru/worships/calendar/images/'.$image;
 					$icon_title = $event['title'];
 		?>
 			<div class="icon"><img height="230" src="<?php echo $src; ?>" title="<?php echo $icon_title; ?>" alt="<?php echo $icon_title; ?>" /><div><?php echo $icon_title; ?></div></div>
@@ -405,7 +405,7 @@ for ($i=1; $i<6; $i++) {
 <!-- Завершение страницы -->	
 <div class="footer">
 	<hr>
-	<p>Версия 3.8.2 от 29.08.2023</p>
+	<p>Версия 3.8.3 от 09.09.2023</p>
 </div>	
 </section>
 </div>
