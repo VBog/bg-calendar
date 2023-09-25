@@ -76,6 +76,7 @@ function bg_getDayEvents ($year, $events) {
 		$dates = bg_get_date_by_rule ($event['rule'], $year);
 		if (!empty($dates)) {
 			foreach ($dates as $date) {
+				$wd = date("N",strtotime($date));
 				$dd = bg_ddif($year);
 				$old = date("j-m", strtotime($date.'- '.$dd.' days'));
 				$old = preg_replace_callback ('/(\d+)\-(\d+)/u', function ($matches) {
@@ -92,6 +93,9 @@ function bg_getDayEvents ($year, $events) {
 				} elseif (in_array($date, $easterweek) && $event['level'] > 2 && $event['level'] != 8) {
 					$event['readings'] = array();
 				}
+				
+				// По воскресеньям на Утрени нет чтений праздников кроме двунадесятых
+				if ($wd == 7 && $event['level'] > 0) $event['readings']['morning'] = '';
 				
 			// Переносим праздники (кроме Двунадесятых, Великих и бденных, а также особых дней)
 				if (!empty($event['readings']) && (($event['level'] > 2 && $event['level'] != 8) || in_array($event['subtype'],['prefeast']))) {
@@ -330,10 +334,10 @@ function bg_getDayEvents ($year, $events) {
 		if (empty($data[$date]['afterfeast']) &&												// НЕ попразднство
 			$date < bg_get_new_date ('0--48', $y) || bg_get_new_date ('0-49', $y) < $date ) { 	// Только в период Октоиха 
 																									// Если сегодня:
-			if (!($data[$date]['main_level'] <= 2 && $data[$date]['main_feast_type'] == '1') && 	// НЕ господский,
-				!($data[$date]['main_level'] <= 2 && $wd < 7) &&										// и НЕ Великий и Бденный в будни
-				$date != bg_get_new_date ('09-01', $y) &&												// и НЕ Новолетие
-				$data[$date]['main_type'] != 'eve') {													// и НЕ Навечерие
+			if (!($data[$date]['main_level'] <= 2 && $data[$date]['main_feast_type'] == '1') && 	// НЕ господский в любой день,
+				!($data[$date]['main_level'] <= 2 &&												// НЕ Великий и Бденный
+				$date != bg_get_new_date ('09-01', $y)  && $wd < 7) &&								// и НЕ Новолетие в будни,
+				$data[$date]['main_type'] != 'eve') {												// НЕ Навечерие
 
 			// Проверяем переносы рядовых чтений на сегодня
 
