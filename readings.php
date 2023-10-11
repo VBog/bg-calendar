@@ -58,6 +58,8 @@ function bg_getDayEvents ($year, $events) {
 	$universal_saturday = bg_get_date_by_rule ('0--57;0-48', $year);
 	// Димитриевская родительская суббота
 	$dimitry_saturday = bg_get_date_by_rule ('6:10-15;10-19,10-21;10-23,10-25', $year);
+	// Ср и Пт сырной седмицы
+	$wed_fri = bg_get_date_by_rule ('0--53;0--51', $year);
 	// Первые 4 дня Великого поста (дни Великого покоянного канона)
 	$lent_start = bg_get_date_by_rule ('0--47,0--44', $year);
 	// Преполовение Великого поста
@@ -112,6 +114,19 @@ function bg_getDayEvents ($year, $events) {
 						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
 						$data[$newdate]['events'][] = $event;
 					
+				// В среду и пятницу сырной седмицы полиелейные праздники меняем на вседневные предыдущего дня
+					} elseif (in_array($date, $wed_fri)) {
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
+						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
+						$data[$newdate]['events'][] = $event;
+						foreach ($data[$newdate]['events'] as $event) {
+							if (in_array($event['level'], [5, 6]) && !empty($event['minea_id'])) {
+								$event['title'] .= ' '.sprintf(_('(перенос с предыдущего дня)'), $old);
+								$data[$date]['events'][] = $event;
+								break;
+							}
+						}
+
 				// Первые 4 дня Великого поста праздники переносим на следующую Сб
 					} elseif (in_array($date, $lent_start)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
@@ -188,7 +203,7 @@ function bg_getDayEvents ($year, $events) {
 		
 		// Если вселенская родительская суббота или навечерие, или воскресный день в период Триодей
 		// то это главный праздник
-		if ($special_ind != '' && in_array($day_subtype, ['universal_saturday', 'eve', 'sunday', 'sunday_before', 'sunday_after'] )) {
+		if (!is_blank($special_ind) && in_array($day_subtype, ['universal_saturday', 'eve', 'sunday'] )) {
 			$main_ind = $special_ind;
 			$event = $value['events'][$special_ind];
 			$main_level = $event['level'];
