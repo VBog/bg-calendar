@@ -275,7 +275,8 @@ function bg_getDayEvents ($year, $events) {
 			}
 		}
 		// В попразднство в Неделю совмещение служб отменяется
-		if ($wd == 7 && !is_blank($festivity_ind)) {
+		// а также в родительские субботы
+		if (($wd == 7 && !is_blank($festivity_ind)) || $day_subtype == 'saturday_honor_dead') {
 			foreach ($value['events'] as $key => $event) {
 				if ($event['dual_worship'] > 0) {
 					$data[$date]['events'][$key]['dual_worship'] = 0;
