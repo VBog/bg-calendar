@@ -14,9 +14,12 @@ echo 'Память для скрипта: ' . ini_get('memory_limit') . '<br>';
 include_once ('functions.php');
 include_once ('readings.php');
 
-/***
-	Исполняемый код
-***/
+if (isset($_GET["pass"])){
+	$password = $_GET["pass"];
+	if (!file_exists($password)) exit("Вам не разрешен доступ.");
+} else {
+	exit();
+}
 
 if (isset($_GET["file"])){
 	$filename = $_GET["file"];

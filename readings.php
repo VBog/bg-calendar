@@ -166,6 +166,8 @@ function bg_getDayEvents ($year, $events) {
 		$wd = date("N",strtotime($date));
 		
 		$festivity_ind = '';		// Празднество
+		$festivity_type = '';
+		$festivity_subtype = '';
 		$special_ind = '';			// Особый день
 		$day_type = '';
 		$day_subtype = '';
@@ -186,6 +188,8 @@ function bg_getDayEvents ($year, $events) {
 		// Пред-/попразднство
 			if ($event['type'] == 'festivity') {
 				$festivity_ind = $key;
+				$festivity_type = $event['type'];
+				$festivity_subtype = $event['subtype'];
 		// Особый день
 			} elseif ($event['type'] != 'event') {
 				$special_ind = $key;
@@ -306,6 +310,8 @@ function bg_getDayEvents ($year, $events) {
 
 		// Добавляем в БД основные параметры дня
 		$data[$date]['festivity_ind'] = $festivity_ind ?? '';		// Пред-/Попразднство (индекс)
+		$data[$date]['festivity_type'] = $festivity_type ?? '';		// Тип празднства
+		$data[$date]['festivity_subtype'] = $festivity_subtype??''; // Подтип празднства
 		$data[$date]['special_ind'] = $special_ind ?? '';			// Особый день (индекс)
 		$data[$date]['day_type'] = $day_type ?? '';					// Тип особого дня
 		$data[$date]['day_subtype'] = $day_subtype ?? '';			// Подтип особого дня
@@ -375,7 +381,8 @@ function bg_getDayEvents ($year, $events) {
 
 				// Рядовые чтений на сегодня
 				$ordinary = (array) $or->bg_day_readings ($date, _("рядовое"));
-				if (in_array($data[$date]['day_subtype'], ['sunday_before', 'sunday_after'])) { 
+				if ($data[$date]['day_type'] == 'weekend' &&
+					in_array($data[$date]['day_subtype'], ['sunday_before', 'sunday_after','sunday'])) { 
 					$ordinary['apostle'] = '';
 					$ordinary['gospel'] = '';
 				}
@@ -415,16 +422,16 @@ function bg_getDayEvents ($year, $events) {
 *******************************************************************************/  
 function is_vasiliy_velikiy($date) {
 	
-	list ($year, $m, $d) = explode ('-', $date);
+	$old = bg_get_old_date ($date);
+	list ($year, $m, $d) = explode ('-', $old);
 								
 	$date_array = array_merge (	bg_get_date_by_rule ('01-01', $year),							// день памяти Василия Великого 1 (14) января;
 								bg_get_date_by_rule ('0--42;0--35;0--28;0--21;0--14', $year),	// 1, 2, 3, 4 и 5-е воскресенье Великого поста;
 								bg_get_date_by_rule ('0--3;0--1', $year),						// Великий четверг и Великая суббота на Страстной седмице.
 								bg_get_date_by_rule ('1,2,3,4,5:12-24;01-05', $year),			// навечерия праздников Рождества Христова и Крещения 
-								bg_get_date_by_rule ('7,1:12-25;01-06', $year) );				// или в самый день этих праздников, 
+								bg_get_date_by_rule ('1,7:12-25;01-06', $year) );				// или в самый день этих праздников, 
 																								// если их навечерия выпадают в субботу или воскресенье
-	
-	if (in_array($date, $date_array))  return true;
+	if (in_array($date, $date_array)) return true;
 	else return false;
 }
 /*******************************************************************************
@@ -453,7 +460,8 @@ function is_grigoriy_dvoeslov ($date, $polyeles=false) {
 *******************************************************************************/  
 function is_ioann_zlatoust ($date) {
 	
-	list ($year, $m, $d) = explode ('-', $date);
+	$old = bg_get_old_date ($date);
+	list ($year, $m, $d) = explode ('-', $old);
 	
 	$date_array = bg_get_date_by_rule('1,2,3,4,5:0--53;0--51;0--48,0--4;0--2', $year);	// Ср и Пт Сырной седмицы и будни Великого поста, 
 																						// кроме Великого Четверга							

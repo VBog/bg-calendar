@@ -6,11 +6,15 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="description" content="The orthodox calendar with liturgical readings and troparion.">
-<link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16x16.png">
-<link rel="manifest" href="./icons/site.webmanifest">
-
+<link rel="apple-touch-icon" sizes="180x180" href="https://azbyka.ru/worships/calendar/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://azbyka.ru/worships/calendar/icons/favicon-192x192.png">
+<link rel="icon" type="image/png" sizes="96x96" href="https://azbyka.ru/worships/calendar/icons/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://azbyka.ru/worships/calendar/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://azbyka.ru/worships/calendar/icons/favicon-16x16.png">
+<link rel="manifest" href="https://azbyka.ru/worships/calendar/icons/site.webmanifest">
+<link rel="mask-icon" href="https://azbyka.ru/worships/calendar/icons/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
 <title>Православный календарь</title>
 
 <style>
@@ -59,9 +63,23 @@
 	details {
 		width: 100%;
 	}
-	input[type="button"],
 	summary {
 		cursor: pointer;
+		font-size: 0.9em;
+		margin-bottom: 0.4em;
+	}
+	input[type="button"] {
+		cursor: pointer;
+		font-size: 0.9em;
+		height: 1.8em;
+		border-radius: 0.75em;
+		border: 1px solid #aaa;
+		margin-bottom: 3px;
+	}
+	input#bg_setDay {
+		border-radius: 5px;
+		border: 1px solid #aaa;
+		margin-bottom: 3px;
 	}
 	hr {
 		margin:0;
@@ -89,6 +107,7 @@
 	}
 	
 	div.slider {
+		width: 100%;
 		margin: auto;	
 	}
 	
@@ -117,8 +136,8 @@
 	
 	#icon-pics{
 		display: inline-block;
-		width: 270px;
-		height: 270px;        
+		width: 250px;
+		height: 250px;        
 		overflow: hidden;
 		white-space:nowrap;
 		vertical-align: top;
@@ -130,15 +149,17 @@
 		display: inline-block;
 		vertical-align: top;
 		margin: 0 10px;
-		width: 250px;
-		height:230px;
+		width: 230px;
+		height:210px;
 	}
 	.icon img {
 		filter: drop-shadow(0px 3px 3px #400a);
 	}
-	.icon div {
-		width:250px; 
+	.icon figcaption {
+		width:100%; 
 		font-size: 60%; 
+		text-align: center;
+		height: 3em;
 		white-space: normal;
 	}
 	
@@ -153,7 +174,7 @@
 	}
 	@media screen and (max-width: 480px) {
 		input#bg_setDay {
-			min-width: calc(100% - 20px);
+			min-width: calc(100% - 10px);
 			float: left;
 		}
 	}
@@ -241,7 +262,7 @@ if (file_exists($desc_json)) {
 					$src = 'https://azbyka.ru/worships/calendar/images/'.$image;
 					$icon_title = $event['title'];
 		?>
-			<div class="icon"><img height="230" src="<?php echo $src; ?>" title="<?php echo $icon_title; ?>" alt="<?php echo $icon_title; ?>" /><div><?php echo $icon_title; ?></div></div>
+			<figure class="icon"><img height="210" src="<?php echo $src; ?>" title="<?php echo $icon_title; ?>" alt="<?php echo $icon_title; ?>" /><figcaption><?php echo $icon_title; ?></figcaption></figure>
 		<?php 
 				}
 			}
@@ -405,7 +426,7 @@ for ($i=1; $i<6; $i++) {
 <!-- Завершение страницы -->	
 <div class="footer">
 	<hr>
-	<p>Версия 3.9.1 от 29.10.2023</p>
+	<p>Версия 3.10.0 от 31.12.2023</p>
 </div>	
 </section>
 </div>
@@ -509,10 +530,10 @@ for ($i=1; $i<6; $i++) {
 	var button_right = document.getElementById("scroll-right");
 
 	button_left.onclick = () => {
-	  document.getElementById("icon-pics").scrollLeft -= 276;
+	  document.getElementById("icon-pics").scrollLeft += 256;
 	};
 	button_right.onclick = () => {
-	  document.getElementById("icon-pics").scrollLeft += 276;
+	  document.getElementById("icon-pics").scrollLeft -= 256;
 	};
 </script>
 </body>

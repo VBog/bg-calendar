@@ -5,7 +5,7 @@ function setParam (param=true) {
 	href = href.replace (url.search, '');
 	href = href.replace (url.hash, '');
 	var file = url.search;
-	file = file.split('&')[0];
+	file = file.split('&')[0]+'&'+file.split('&')[1];
 	href = href+file;
 	
 	if (param) {
