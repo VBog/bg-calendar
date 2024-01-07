@@ -16,13 +16,13 @@ include_once ('sedmica.php');
 function bg_getData($year, $file='calendar.json') {
 	
 	$filename = dirname(__FILE__).'/data/'.$year.'.json';
-/*
+
 	if (file_exists($filename)) {
 		$json = file_get_contents($filename);
 		$data = json_decode($json, true);
 		return $data;
 	}	
-*/
+
 	$locale = setlocale(LC_ALL, 0);
 	$calendar_json = dirname(__FILE__).'/locale/'.$locale.'/DATA/'.$file;
 	if (!file_exists($calendar_json)) $calendar_json = dirname(__FILE__).'/'.$file;
@@ -220,7 +220,9 @@ function bg_getDayEvents ($year, $events) {
 				$icon = $event['imgs'][0];
 			}
 		// Отдание считаем главным праздником
-		} elseif ($festivity_ind != '' && $value['events'][$festivity_ind]['subtype'] == 'feastend') {
+		} elseif ($festivity_ind != '' && $value['events'][$festivity_ind]['subtype'] == 'feastend' &&
+			!(bg_get_date_by_rule ('11-25', $year) || bg_get_date_by_rule ('1:12-26', $year))) {	// Кроме отдания Введения и Собора Богородицы в Пн (с Неделей Богоотец)
+
 			$main_ind = $festivity_ind;
 			$event = $value['events'][$festivity_ind];
 			$main_level = $event['level'];
@@ -464,10 +466,13 @@ function is_ioann_zlatoust ($date) {
 	list ($year, $m, $d) = explode ('-', $old);
 	
 	$date_array = bg_get_date_by_rule('1,2,3,4,5:0--53;0--51;0--48,0--4;0--2', $year);	// Ср и Пт Сырной седмицы и будни Великого поста, 
-																						// кроме Великого Четверга							
+																						// кроме Великого Четверга
+	$date_array = array_merge($date_array, bg_get_date_by_rule('1,2,3,4,5:01-05;12-24', $year));	// Навечерия РХ и Богоявления
+	$date_array = array_merge($date_array, bg_get_date_by_rule('5:01-03,01-04;12-22,12-23', $year));
+																						
 	if (!is_vasiliy_velikiy($date) &&								// НЕ Литургия Василия Великого				
 		(in_array($date, bg_get_date_by_rule('03-25', $year)) || 	// и Благовещение 
-		!in_array($date, $date_array)) ) return true;				// или НЕ Великий Пост
+		!in_array($date, $date_array)) ) return true;				// или НЕ Великий Пост и НЕ Навечерия РХ и Богоявления
 	else return false;
 }	
 

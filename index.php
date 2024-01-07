@@ -213,6 +213,7 @@ $date = bg_currentDate();
 
 list($y, $m, $d) = explode('-', $date);
 $y = (int)$y; 
+
 $wd = date("N",strtotime($date));
 $tone = bg_getTone($date);
 $easter = bg_get_easter($y);
@@ -426,7 +427,7 @@ for ($i=1; $i<6; $i++) {
 <!-- Завершение страницы -->	
 <div class="footer">
 	<hr>
-	<p>Версия 3.10.1 от 02.01.2024</p>
+	<p>Версия 3.10.2 от 07.01.2024</p>
 </div>	
 </section>
 </div>

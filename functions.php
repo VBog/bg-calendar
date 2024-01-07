@@ -20,10 +20,13 @@ function bg_currentDate($shift=0) {
 		$date = $_GET["date"];
 	}
 
-	if (!strtotime ($date)) {		// Текущая дата
+	if (empty ($date)) {			// Текущая дата
 		if (function_exists('bg_сustomDate')) $date = bg_сustomDate();
 		else $date = date('Y-m-d', time());
 	}
+	// Проверяем на валидность, если ошибка, то текущая дата
+	$day = explode ('-', $date);
+	if (count($day) != 3 || !checkdate($day[1], $day[2], $day[0])) $date = date('Y-m-d', time()); 
 	
 	if ($shift) {
 		list($year, $m, $d) = explode ('-', $date);
@@ -162,8 +165,10 @@ function bg_get_date_by_rule ($rules, $year) {
 *******************************************************************************/
 function bg_get_new_date ($old, $year) {
 	$old_arr = explode ('-', $old, 2);
-	$m = (int) $old_arr[0];
-	$d = (int) $old_arr[1];
+	$m = (int) $old_arr[0]??0;
+	$d = (int) $old_arr[1]??0;
+	
+//	if (!$d) return '';
 	
 	if ($m == 0) {	// Переходящий праздник
 		 $date = bg_get_easter($year, $d);
