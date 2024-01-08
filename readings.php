@@ -221,7 +221,7 @@ function bg_getDayEvents ($year, $events) {
 			}
 		// Отдание считаем главным праздником
 		} elseif ($festivity_ind != '' && $value['events'][$festivity_ind]['subtype'] == 'feastend' &&
-			!(bg_get_date_by_rule ('11-25', $year) || bg_get_date_by_rule ('1:12-26', $year))) {	// Кроме отдания Введения и Собора Богородицы в Пн (с Неделей Богоотец)
+			!in_array($date, bg_get_date_by_rule (['11-25','1:12-26'], $year))) {	// Кроме отдания Введения и Собора Богородицы в Пн (с Неделей Богоотец)
 
 			$main_ind = $festivity_ind;
 			$event = $value['events'][$festivity_ind];
