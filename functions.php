@@ -85,9 +85,14 @@ function bg_get_date_by_rule ($rules, $year) {
 	$rules_array = array();
 	$dates_array = array();
 	if (!is_array($rules)) {
-		if (function_exists($rules)) $rules_array[0] = $rules($year);
-		else $rules_array[0] = $rules;
+		$fn = explode('=', $rules);
+		if (function_exists($fn[0])) {
+			if (count($fn) > 1) $rules_array[0] = $fn[0]($year, $fn[1]);
+			else $rules_array[0] = $fn[0]($year);
+			if (empty($rules_array[0])) return array(); 
+		} else $rules_array[0] = $rules;
 	} else $rules_array = $rules;
+
 	foreach ($rules_array as $rule) {
 		// Разбираем правило на дни недели и интервлы дат
 		$rule_array = explode(':', $rule, 2);
@@ -153,6 +158,7 @@ function bg_get_date_by_rule ($rules, $year) {
 			}
 		}
 	}
+
 	return $dates_array;
 }	
 
@@ -282,12 +288,13 @@ function bg_getTone($date) {
 }
 
 // Функция возвращает диапазон дат попразднства Сретения
-function afterfeastCandlemas ($year) {
+function afterfeastCandlemas ($year, $d = '') {
 	
 	$date = bg_get_new_date ('02-02', $year);
 	$dd = -bg_date_easter_dif($date, $year);
 	
 	$afterfeast = [
+		'65' => '02-03,02-08',
 		'64' => '02-03,02-07',
 		'63' => '02-03,02-06',
 		'62' => '02-03,02-05',
@@ -304,9 +311,23 @@ function afterfeastCandlemas ($year) {
 		'51' => '02-03'
 	];
 	
-	if ($dd > 64) return '02-03,02-08';
-	elseif ($dd < 51) return '';
-	else return $afterfeast[$dd];
+	if ($dd > 64) $dd = 65;
+	
+	$rule = '';
+	if ($dd > 50) {
+		if ($d) {
+			$intervals = explode (';', $afterfeast[$dd]);
+			foreach ($intervals as $interval) {
+				$rangs = explode (',', $interval);
+				if (count($rangs) == 1) $rangs[1] = $rangs[0]; 
+				if ($d >= $rangs[0] && $d <= $rangs[1]) {
+					$rule = $d;
+					break;
+				}
+			}
+		} else $rule = $afterfeast[$dd];
+	}
+	return $rule;
 }
 
 // Функция возвращает дату отдания Сретения

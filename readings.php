@@ -221,7 +221,7 @@ function bg_getDayEvents ($year, $events) {
 			}
 		// Отдание считаем главным праздником
 		} elseif ($festivity_ind != '' && $value['events'][$festivity_ind]['subtype'] == 'feastend' &&
-			!in_array($date, bg_get_date_by_rule (['11-25','1:12-26'], $year))) {	// Кроме отдания Введения и Собора Богородицы в Пн (с Неделей Богоотец)
+			!in_array($date, bg_get_date_by_rule (['01-07;11-25','1:12-26'], $year))) {	// Кроме Собора Предтечи, отдания Введения и Собора Богородицы в Пн (с Неделей Богоотец)
 
 			$main_ind = $festivity_ind;
 			$event = $value['events'][$festivity_ind];
@@ -358,7 +358,7 @@ function bg_getDayEvents ($year, $events) {
 		if (empty($data[$date]['afterfeast']) &&												// НЕ попразднство
 			$date < bg_get_new_date ('0--48', $y) || bg_get_new_date ('0-49', $y) < $date ) { 	// Только в период Октоиха 
 																									// Если сегодня:
-			if (!($data[$date]['main_level'] <= 2 && $data[$date]['main_feast_type'] == '1') && 	// НЕ господский в любой день,
+			if (!($data[$date]['main_level'] == 0 && $data[$date]['main_feast_type'] == '1') && 	// НЕ господский в любой день,
 				!($data[$date]['main_level'] <= 2 &&												// НЕ Великий и Бденный
 				$date != bg_get_new_date ('09-01', $y)  && $wd < 7) &&								// и НЕ Новолетие в будни,
 				$data[$date]['main_type'] != 'eve') {												// НЕ Навечерие
@@ -368,13 +368,13 @@ function bg_getDayEvents ($year, $events) {
 				// Вчера Великий или бденный праздник и сегодня вторник
 				// или со вторника по субботу и позавчера Великий или бденный праздник
 				if (!empty($data[$yesterday]) && 																	// Вчера: 
-					(($data[$yesterday]['main_level'] <= 2 && $data[$yesterday]['main_feast_type'] == '1') || 	// Господский,
+					(($data[$yesterday]['main_level'] == 0 && $data[$yesterday]['main_feast_type'] == '1') || 	// Господский,
 						($data[$yesterday]['main_level'] <= 2 && $wd_y < 7) ||											// или Великий и Бденный в будни
 						$data[$yesterday]['main_type'] == 'eve') &&														// или Навечерие
 					($wd == 2 || 																					// и сегодня Вторник
 					($wd > 1 && $wd < 7 && 																			// или сегодня Вт,Ср,Чт,Пт или Сб
 					!empty($data[$before_yesterday]) && 																	// и позавчера: 
-					(($data[$before_yesterday]['main_level'] <= 2 && $data[$before_yesterday]['main_feast_type'] == '1') || 	// Господский,
+					(($data[$before_yesterday]['main_level'] == 0 && $data[$before_yesterday]['main_feast_type'] == '1') || 	// Господский,
 						($data[$before_yesterday]['main_level'] <= 2 && $wd_by < 7) ||												// или Великий или Бденный в будни
 						$data[$before_yesterday]['main_type'] == 'eve')))) {														// или Навечерие
 				
@@ -394,7 +394,7 @@ function bg_getDayEvents ($year, $events) {
 
 				// Будни и завтра Великий или бденный праздник
 				if ($wd < 6 && !empty($data[$tomorrow]) && 															// Завтра:
-					(($data[$tomorrow]['main_level'] <= 2 && $data[$tomorrow]['main_feast_type'] == '1') || 		// Господский,
+					(($data[$tomorrow]['main_level'] == 0 && $data[$tomorrow]['main_feast_type'] == '1') || 		// Господский,
 						($data[$tomorrow]['main_level'] <= 2 && $wd_t < 7) ||											// или Великий или Бденный в будни
 						$tomorrow == bg_get_new_date ('09-01', $y) ||													// или Новолетие
 						$data[$tomorrow]['main_type'] == 'eve')) {														// или Навечерие
@@ -402,14 +402,18 @@ function bg_getDayEvents ($year, $events) {
 					$readings[] = (array) $or->bg_day_readings ($tomorrow, $wd_name[$wd_t-1]);
 				} 
 			} elseif ($data[$date]['main_level'] <= 2 && $wd == 1 && !empty($data[$tomorrow]) && 					// Сегодня Великий или Бденный, Пн, и Завтра:
-					(($data[$tomorrow]['main_level'] <= 2 && $data[$tomorrow]['main_feast_type'] == '1') || 		// Господский,
+					(($data[$tomorrow]['main_level'] == 0 && $data[$tomorrow]['main_feast_type'] == '1') || 		// Господский,
 						($data[$tomorrow]['main_level'] <= 2 && $wd_t < 7) ||											// или Великий и Бденный в будни
 						$data[$tomorrow]['main_type'] == 'eve') ) {														// или Навечерие
 				$readings[] = (array) $or->bg_day_readings ($date, _("рядовое"));					
 			}
 		} else $readings[] = (array) $or->bg_day_readings ($date, '');
+		
+		if ($date == bg_get_new_date ('01-07', $y) || 			// В Собор Богородицы
+			$date == bg_get_new_date ('12-26', $y)) 			// и в Собор Предтечи 
+				$data[$date]['ordinary_readings'] = array();	// рядовые чтения отменяются
 
-		$data[$date]['ordinary_readings'] = $readings;		// Рядовые чтения
+		else $data[$date]['ordinary_readings'] = $readings;		// Рядовые чтения
 		$data[$date] = array_slice($data[$date], 1, count($data[$date])-1, true) + array('events' => $data[$date]['events']);
 		
 	}
