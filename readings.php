@@ -250,33 +250,33 @@ function bg_getDayEvents ($year, $events) {
 				$icon = $ev['imgs'][0];
 			}
 			
-			// Если есть двунадесятый, великий или бденный праздник, то это Главный праздник 
-			foreach ($tipicon_events as $key) {
-				$event = $value['events'][$key];
-				$rank = intval($event['feast_type'].$event['level']);
-				if ($main_rank > $rank && $event['level'] <= 2) {
-					$main_ind = $key;
-					$main_level = $event['level'];
-					$main_type = $event['type'];
-					$main_subtype = $event['subtype'];
-					$main_feast_type = $event['feast_type'];
-					$main_rank = intval($main_feast_type.$main_level);
-					if (!empty($event['imgs'])) {
-						$icon_title = $event['title'];
-						$icon = $event['imgs'][0];
-					}
+		}
+		// Если есть двунадесятый, великий или бденный праздник, то это Главный праздник 
+		foreach ($tipicon_events as $ind) {
+			$event = $value['events'][$ind];
+			$rank = intval($event['feast_type'].$event['level']);
+			if ((!$main_rank || $main_rank > $rank) && $event['level'] <= 2) {
+				$main_ind = $ind;
+				$main_level = $event['level'];
+				$main_type = $event['type'];
+				$main_subtype = $event['subtype'];
+				$main_feast_type = $event['feast_type'];
+				$main_rank = intval($main_feast_type.$main_level);
+				if (!empty($event['imgs'])) {
+					$icon_title = $event['title'];
+					$icon = $event['imgs'][0];
 				}
 			}
-			
-		// Второе событие дня (по умолчанию - нет)
-			$second_ind = '';
-			if (!is_blank($main_ind) && $value['events'][$main_ind]['dual_worship'] > 0) {	// Двойной праздник
-				foreach ($value['events'] as $key => $event) {
-					// Одинаковый номер пары и другой id 
-					if ($event['dual_worship'] == $value['events'][$main_ind]['dual_worship'] && $key != $main_ind) {
-						$second_ind = $key;
-						break;
-					}
+		}
+		
+	// Второе событие дня (по умолчанию - нет)
+		$second_ind = '';
+		if (!is_blank($main_ind) && $value['events'][$main_ind]['dual_worship'] > 0) {	// Двойной праздник
+			foreach ($value['events'] as $key => $event) {
+				// Одинаковый номер пары и другой id 
+				if ($event['dual_worship'] == $value['events'][$main_ind]['dual_worship'] && $key != $main_ind) {
+					$second_ind = $key;
+					break;
 				}
 			}
 		}
