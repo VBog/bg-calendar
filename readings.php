@@ -455,7 +455,7 @@ function is_grigoriy_dvoeslov ($date, $polyeles=false) {
 	
 	if (in_array($date, bg_get_date_by_rule('03-25', $year)))  return false;							// Благовещение 
 	elseif (in_array($date, $date_array)) return true;													// Ср и Пт Четыредесятницы и с Пн по Ср Страстной седмицы
-	elseif ($polyeles && in_array($date, bg_get_date_by_rule('1,2,4:0--48,0--9', $year))) return true;	// Полиелей
+	elseif ($polyeles && in_array($date, bg_get_date_by_rule('1,2,4:0--41,0--9', $year))) return true;	// Полиелей
 	else return false;
 }
 
