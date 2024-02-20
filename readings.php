@@ -62,6 +62,8 @@ function bg_getDayEvents ($year, $events) {
 	$wed_fri = bg_get_date_by_rule ('0--53;0--51', $year);
 	// Первые 4 дня Великого поста (дни Великого покоянного канона)
 	$lent_start = bg_get_date_by_rule ('0--47,0--44', $year);
+	// Суббота 1-й седмицы Великого поста
+	$lent_1_saturday = bg_get_new_date ('0--43', $year);
 	// Преполовение Великого поста
 	$lent_half = bg_get_date_by_rule ('0--25', $year);
 	// День Великого канона (Мариино стояние)
@@ -69,6 +71,7 @@ function bg_getDayEvents ($year, $events) {
 	// Акафист Пресятой Богородице
 	$akathist = bg_get_date_by_rule ('0--15', $year);
 	
+	$lent_feast = '';
 	$data = array();
 	// Формируем массив по дням года
 	foreach ($events as $event) {
@@ -130,8 +133,9 @@ function bg_getDayEvents ($year, $events) {
 				// Первые 4 дня Великого поста праздники переносим на следующую Сб
 					} elseif (in_array($date, $lent_start)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
-						$newdate = bg_get_new_date ('0--43', $year);
+						$newdate = $lent_1_saturday;
 						$data[$newdate]['events'][] = $event;
+						$lent_feast = $date;
 
 				// В Ср 4-й седмицы, то есть в преполовение Великого поста праздники переносим на Вт 4-й седмицы
 					} elseif (in_array($date, $lent_half)) {
@@ -154,6 +158,14 @@ function bg_getDayEvents ($year, $events) {
 					} else {
 						$data[$date]['events'][] = $event;
 					}
+			// Если на субботу 1-й седмицы Великого поста перенесен полиелейный праздник, 
+			// то меняем его на первый вседневный праздник субботы
+				} elseif (!empty($lent_feast) && $date == $lent_1_saturday && 
+					(in_array($event['level'], [5, 6]) && !empty($event['minea_id']) && $event['subtype'] != 'triod') ) {
+					$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст. )'), $old);
+					$data[$lent_feast]['events'][] = $event;
+					$lent_feast = '';
+
 				} else {
 					$data[$date]['events'][] = $event;
 				}
@@ -219,6 +231,20 @@ function bg_getDayEvents ($year, $events) {
 				$icon_title = $event['title'];
 				$icon = $event['imgs'][0];
 			}
+		// Четверток Великого канона - главный праздник
+		} elseif (in_array($date, $grand_canon)) {
+			$main_ind = $special_ind;
+			$event = $value['events'][$special_ind];
+			$main_level = $event['level'];
+			$main_type = $event['type'];
+			$main_subtype = $event['subtype'];
+			$main_feast_type = $event['feast_type'];
+			$main_rank = 0;
+			if (!empty($event['imgs'])) {
+				$icon_title = $event['title'];
+				$icon = $event['imgs'][0];
+			}
+						
 		// Отдание считаем главным праздником
 		} elseif ($festivity_ind != '' && $value['events'][$festivity_ind]['subtype'] == 'feastend' &&
 			!in_array($date, bg_get_date_by_rule (['01-07;11-25','1:12-26'], $year))) {	// Кроме Собора Предтечи, отдания Введения и Собора Богородицы в Пн (с Неделей Богоотец)
@@ -234,6 +260,8 @@ function bg_getDayEvents ($year, $events) {
 				$icon_title = $event['title'];
 				$icon = $event['imgs'][0];
 			}
+			
+		
 		
 		// Найдем главный праздник и икону дня в списке праздников Типикона
 		} elseif (sizeof($tipicon_events)) {
