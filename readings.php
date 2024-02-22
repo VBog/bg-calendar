@@ -62,8 +62,6 @@ function bg_getDayEvents ($year, $events) {
 	$wed_fri = bg_get_date_by_rule ('0--53;0--51', $year);
 	// Первые 4 дня Великого поста (дни Великого покоянного канона)
 	$lent_start = bg_get_date_by_rule ('0--47,0--44', $year);
-	// Суббота 1-й седмицы Великого поста
-	$lent_1_saturday = bg_get_new_date ('0--43', $year);
 	// Преполовение Великого поста
 	$lent_half = bg_get_date_by_rule ('0--25', $year);
 	// День Великого канона (Мариино стояние)
@@ -71,7 +69,7 @@ function bg_getDayEvents ($year, $events) {
 	// Акафист Пресятой Богородице
 	$akathist = bg_get_date_by_rule ('0--15', $year);
 	
-	$lent_feast = '';
+	$transfer_dates = array();
 	$data = array();
 	// Формируем массив по дням года
 	foreach ($events as $event) {
@@ -82,12 +80,7 @@ function bg_getDayEvents ($year, $events) {
 		if (!empty($dates)) {
 			foreach ($dates as $date) {
 				$wd = date("N",strtotime($date));
-				$dd = bg_ddif($year);
-				$old = date("j-m", strtotime($date.'- '.$dd.' days'));
-				$old = preg_replace_callback ('/(\d+)\-(\d+)/u', function ($matches) {
-						$monthes = [_("января"),_("февраля"),_("марта"),_("апреля"),_("мая"),_("июня"),_("июля"),_("августа"),_("сентября"),_("октября"),_("ноября"),_("декабря")];
-						return $matches[1].' '.$monthes[$matches[2]-1];
-					}, $old);
+				$old = get_old_date ($date);
 				
 			// Отменяем чтения
 				// В период триодей чтения только на полиейные праздники и на праздники триоди
@@ -122,32 +115,28 @@ function bg_getDayEvents ($year, $events) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
 						$data[$newdate]['events'][] = $event;
-						foreach ($data[$newdate]['events'] as $event) {
-							if (in_array($event['level'], [5, 6]) && !empty($event['minea_id'])) {
-								$event['title'] .= ' '.sprintf(_('(перенос с предыдущего дня)'), $old);
-								$data[$date]['events'][] = $event;
-								break;
-							}
-						}
+						$transfer_dates[$newdate] = $date;
 
 				// Первые 4 дня Великого поста праздники переносим на следующую Сб
 					} elseif (in_array($date, $lent_start)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
-						$newdate = $lent_1_saturday;
+						$newdate = bg_get_new_date ('0--43', $year);
 						$data[$newdate]['events'][] = $event;
-						$lent_feast = $date;
+						$transfer_dates[$newdate] = $date;
 
 				// В Ср 4-й седмицы, то есть в преполовение Великого поста праздники переносим на Вт 4-й седмицы
 					} elseif (in_array($date, $lent_half)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'),  $old);
 						$newdate = bg_get_new_date ('0--26', $year);
 						$data[$newdate]['events'][] = $event;
+						$transfer_dates[$newdate] = $date;
 
 				// В Чт 5-й седмицы — в службу Великого канона праздники переносим на Вт 5-й седмицы
 					} elseif (in_array($date, $grand_canon)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = bg_get_new_date ('0--19', $year);
 						$data[$newdate]['events'][] = $event;
+						$transfer_dates[$newdate] = $date;
 
 				// В субботу Акафиста (Сб 5-й седмицы) праздники переносим на Неделю 5-ю Великого поста
 					} elseif (in_array($date, $akathist)) {
@@ -158,13 +147,6 @@ function bg_getDayEvents ($year, $events) {
 					} else {
 						$data[$date]['events'][] = $event;
 					}
-			// Если на субботу 1-й седмицы Великого поста перенесен полиелейный праздник, 
-			// то меняем его на первый вседневный праздник субботы
-				} elseif (!empty($lent_feast) && $date == $lent_1_saturday && 
-					(in_array($event['level'], [5, 6]) && !empty($event['minea_id']) && $event['subtype'] != 'triod') ) {
-					$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст. )'), $old);
-					$data[$lent_feast]['events'][] = $event;
-					$lent_feast = '';
 
 				} else {
 					$data[$date]['events'][] = $event;
@@ -173,6 +155,26 @@ function bg_getDayEvents ($year, $events) {
 		}
 	}
 
+	// Если в день (date), откуда был перенесен полиелейный праздник нет вседневных событий со службой, 
+	// то переносим на него первый вседневный праздник дня (newdate), куда был перенесен полиелей
+	foreach ($transfer_dates as $newdate => $date) {
+		$event_exist = false;
+		foreach($data[$date]['events'] as $ev) {
+			if ($ev['type'] == 'event' && in_array($ev['level'], [5, 6])) $event_exist = true;
+		}
+		if (!$event_exist) { 
+			foreach ($data[$newdate]['events'] as $k=>$event) {
+				if (in_array($event['level'], [5, 6]) && !empty($event['minea_id'])&& $event['subtype'] != 'triod') {
+					$old = get_old_date ($newdate);
+					$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
+					$data[$date]['events'][] = $event;
+					unset ($data[$newdate]['events'][$k]);
+					break;
+				}
+			}
+		}
+	}
+	
 	// Дополним массив данных по дням дополнительной информацией
 	foreach ($data as $date => $value) {
 		$wd = date("N",strtotime($date));
@@ -770,3 +772,14 @@ function is_blank ($var) {
 	else return false;
 }
 	
+// Возвращает дату по старому стилю в формате: день месяц
+function get_old_date ($date) {
+	list($year, $m, $d) = explode('-', $date);
+	$dd = bg_ddif($year);
+	$old = date("j-m", strtotime($date.'- '.$dd.' days'));
+	$old = preg_replace_callback ('/(\d+)\-(\d+)/u', function ($matches) {
+			$monthes = [_("января"),_("февраля"),_("марта"),_("апреля"),_("мая"),_("июня"),_("июля"),_("августа"),_("сентября"),_("октября"),_("ноября"),_("декабря")];
+			return $matches[1].' '.$monthes[$matches[2]-1];
+		}, $old);
+	return $old;
+}
