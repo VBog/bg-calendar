@@ -171,8 +171,8 @@ function bg_get_date_by_rule ($rules, $year) {
 *******************************************************************************/
 function bg_get_new_date ($old, $year) {
 	$old_arr = explode ('-', $old, 2);
-	$m = (int) $old_arr[0]??0;
-	$d = (int) $old_arr[1]??0;
+	$m = (int) ($old_arr[0]??0);
+	$d = (int) ($old_arr[1]??0);
 	
 //	if (!$d) return '';
 	
@@ -282,7 +282,7 @@ function bg_getTone($date) {
 	if ($num < 0) {									// Если дата раньше Пасхи этого года,
 		$num = bg_date_easter_dif($date, $year-1);	// то отсчитываем от предыдущей Пасхи
 	}
-	if ($num < 7) $tone = $num+1;
+	if ($num < 7) $tone = [1,2,3,4,5,6,8][$num];
 	else $tone = floor(($num-7)/7)%8+1;
 	return $tone;
 }

@@ -68,7 +68,11 @@ function bg_getDayEvents ($year, $events) {
 	$grand_canon = bg_get_date_by_rule ('0--17', $year);
 	// Акафист Пресятой Богородице
 	$akathist = bg_get_date_by_rule ('0--15', $year);
-	
+	// Страстная седмица
+	$holy_week = bg_get_date_by_rule ('0--6,0--1', $year);
+	// Благовещение с предпразднством и отданием
+	$annunciation = bg_get_date_by_rule ('03-24,03-26', $year);
+
 	$transfer_dates = array();
 	$data = array();
 	// Формируем массив по дням года
@@ -142,6 +146,12 @@ function bg_getDayEvents ($year, $events) {
 					} elseif (in_array($date, $akathist)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = bg_get_new_date ('0--14', $year);
+						$data[$newdate]['events'][] = $event;
+
+				// В период Благовещения переносим праздники Триоди на повечерие предыдущего дня (Сб)
+					} elseif (in_array($date, $annunciation)&& $event['subtype'] == 'triod') {
+						$event['title'] .= ' '.sprintf(_('(перенос на повечерие с %s ст.ст.)'), $old);
+						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
 						$data[$newdate]['events'][] = $event;
 
 					} else {
@@ -247,6 +257,20 @@ function bg_getDayEvents ($year, $events) {
 				$icon = $event['imgs'][0];
 			}
 						
+		// Дни Страстной седмицы - главный праздник
+		} elseif (in_array($date, $holy_week)) {
+			$main_ind = $special_ind;
+			$event = $value['events'][$special_ind];
+			$main_level = $event['level'];
+			$main_type = $event['type'];
+			$main_subtype = $event['subtype'];
+			$main_feast_type = $event['feast_type'];
+			$main_rank = 0;
+			if (!empty($event['imgs'])) {
+				$icon_title = $event['title'];
+				$icon = $event['imgs'][0];
+			}
+						
 		// Отдание считаем главным праздником
 		} elseif ($festivity_ind != '' && $value['events'][$festivity_ind]['subtype'] == 'feastend' &&
 			!in_array($date, bg_get_date_by_rule (['01-07;11-25','1:12-26'], $year))) {	// Кроме Собора Предтечи, отдания Введения и Собора Богородицы в Пн (с Неделей Богоотец)
@@ -281,11 +305,11 @@ function bg_getDayEvents ($year, $events) {
 			}
 			
 		}
-		// Если есть двунадесятый, великий или бденный праздник, то это Главный праздник 
+		// Если есть двунадесятый, великий или бденный праздник, или событие Триоди то это Главный праздник 
 		foreach ($tipicon_events as $ind) {
 			$event = $value['events'][$ind];
 			$rank = intval($event['feast_type'].$event['level']);
-			if ((!$main_rank || $main_rank > $rank) && $event['level'] <= 2) {
+			if (((!$main_rank || $main_rank > $rank) && $event['level'] <= 2) || $event['subtype'] == 'triod') {
 				$main_ind = $ind;
 				$main_level = $event['level'];
 				$main_type = $event['type'];
