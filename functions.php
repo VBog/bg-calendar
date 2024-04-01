@@ -16,8 +16,8 @@
 function bg_currentDate($shift=0) {
 	$date = '';
 
-	if (isset($_GET["date"])) {		// Задана дата
-		$date = $_GET["date"];
+	if (isset($_REQUEST["date"])) {		// Задана дата
+		$date = $_REQUEST["date"];
 	}
 
 	if (empty ($date)) {			// Текущая дата
@@ -26,7 +26,9 @@ function bg_currentDate($shift=0) {
 	}
 	// Проверяем на валидность, если ошибка, то текущая дата
 	$day = explode ('-', $date);
-	if (count($day) != 3 || !checkdate($day[1], $day[2], $day[0])) $date = date('Y-m-d', time()); 
+	if (count($day) != 3 || !checkdate($day[1], $day[2], $day[0])){ 
+		$date = date('Y-m-d', time()); 
+	}
 	
 	if ($shift) {
 		list($year, $m, $d) = explode ('-', $date);

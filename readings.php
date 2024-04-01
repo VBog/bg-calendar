@@ -273,7 +273,7 @@ function bg_getDayEvents ($year, $events) {
 						
 		// Отдание считаем главным праздником
 		} elseif ($festivity_ind != '' && $value['events'][$festivity_ind]['subtype'] == 'feastend' &&
-			!in_array($date, bg_get_date_by_rule (['01-07;11-25','1:12-26'], $year))) {	// Кроме Собора Предтечи, отдания Введения и Собора Богородицы в Пн (с Неделей Богоотец)
+			!in_array($date, bg_get_date_by_rule (['01-07;03-26;11-25','1:12-26'], $year))) {	// Кроме Собора Предтечи, отдания Благовещения, отдания Введения и Собора Богородицы в Пн (с Неделей Богоотец)
 
 			$main_ind = $festivity_ind;
 			$event = $value['events'][$festivity_ind];
@@ -305,6 +305,29 @@ function bg_getDayEvents ($year, $events) {
 			}
 			
 		}
+		
+		// В случае предпразднства, самого праздника и отдания Благовещения родительские субботы отменяются
+		if ($day_subtype == 'saturday_honor_dead' && in_array($date, $annunciation)) {
+			$day_subtype = '';
+			$title = $value['events'][$special_ind]['title'];
+			$data[$date]['events'][$special_ind]['title'] = substr($title, 0, strpos($title, "."));
+			$data[$date]['events'][$special_ind]['subtype'] = '';
+			$data[$date]['events'][$special_ind]['readings'] = array();
+			if (!is_blank($festivity_ind)) {
+				$main_ind = $festivity_ind;
+				$event = $value['events'][$festivity_ind];
+				$main_level = $event['level'];
+				$main_type = $event['type'];
+				$main_subtype = $event['subtype'];
+				$main_feast_type = $event['feast_type'];
+				$main_rank = $event['priority'].$event['level'];
+			}
+		}
+		// Отдание Благовещания по будням - вседневный праздник
+		if (in_array($date, bg_get_date_by_rule ('1,2,3,4,5:03-26', $year))) {
+			$data[$date]['events'][$festivity_ind]['level'] = 7;
+		}
+		
 		// Если есть двунадесятый, великий или бденный праздник, или событие Триоди то это Главный праздник 
 		foreach ($tipicon_events as $ind) {
 			$event = $value['events'][$ind];
@@ -790,6 +813,7 @@ function blink ($reference, $customLink) {
 
 // Пустая переменная (0, 0.0 и '0' - значимые)
 function is_blank ($var) {
+	if (!isset($var)) return true;
 	if (is_object($var)) return $var->isEmpty();
 	if (is_array($var)) return sizeof($var)?false:true;
 	if (empty ($var) && $var != 0 && $var !=0.0 && $var != '0') return true;
