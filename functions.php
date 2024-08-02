@@ -175,7 +175,7 @@ function bg_get_new_date ($old, $year) {
 	$old_arr = explode ('-', $old, 2);
 	$m = (int) ($old_arr[0]??0);
 	$d = (int) ($old_arr[1]??0);
-	
+	if ($year%4 != 0 && $m == 2 && $d == 29) $d = 28;
 //	if (!$d) return '';
 	
 	if ($m == 0) {	// Переходящий праздник
@@ -253,7 +253,8 @@ function bg_ddif($year) {
 	Возвращает:
 		Количество дней между Пасхой и указанной датой	
 *******************************************************************************/  
-function bg_date_easter_dif($date, $year) {
+function bg_date_easter_dif($date, $year='') {
+	if (empty($year)) $year = explode('-', bg_get_old_date ($date))[0];
 	$interval = date_diff(date_create(bg_get_easter($year)), date_create($date));
 	return (int)$interval->format('%R%a');
 }

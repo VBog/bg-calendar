@@ -56,8 +56,11 @@ function bg_sedmica ($date) {
 	}
 	else  {														// Седмицы по Пятидесятнице
 		$week_number = (int)($cd/7) - 7;
-		if ($wd == 7) return sprintf(_("Неделя %d-я по Пятидесятнице"), $week_number);
-		else {
+		if ($wd == 7) {
+			if ($week_number == 1) return _("Неделя 1-я по Пятидесятнице. Всех Святых");
+			else return sprintf(_("Неделя %d-я по Пятидесятнице"), $week_number);
+			
+		} else {
 			if ($week_number==0) return _("Седмица 1-я по Пятидесятнице (Троицкая)");
 			else return sprintf(_("Седмица %d-я по Пятидесятнице"), $week_number+1);
 		}
