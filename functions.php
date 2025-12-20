@@ -192,19 +192,19 @@ function bg_get_new_date ($old, $year) {
 }
 
 /*******************************************************************************
-	Функция вычисляет дату по новому стилю в текущем году
+	Функция вычисляет дату по старому стилю в текущем году
 		$date  - дата по новому стилю (в формате Y-m-d)
 	Возвращает:
 		дата по старому стилю
 *******************************************************************************/
-function bg_get_old_date ($date) {
+function bg_get_old_date ($date, $format='Y-m-d') {
 	list($y, $m, $d) = explode ('-', $date);
 	$y = (int) $y;
 	$m = (int) $m;
 	$d = (int) $d;
 	
 	$dd = intval(($m < 3)?bg_ddif($y-1):bg_ddif($y));
-	$old = date( 'Y-m-d', mktime ( 0, 0, 0, $m, $d-$dd, $y ) );
+	$old = date( $format, mktime ( 0, 0, 0, $m, $d-$dd, $y ) );
 
 	return $old;
 }
@@ -334,7 +334,7 @@ function afterfeastCandlemas ($year, $d = '') {
 }
 
 // Функция возвращает дату отдания Сретения
-function feastendCandlemas ($year) {
+function feastendCandlemas ($year, $shift=0) {
 	
 	$date = bg_get_new_date ('02-02', $year);
 	$dd = -bg_date_easter_dif($date, $year);
@@ -357,7 +357,25 @@ function feastendCandlemas ($year) {
 		'49' => '02-03'
 	];
 	
-	if ($dd > 64) return '02-09';
-	elseif ($dd < 49) return '';
-	else return $feastend[$dd];
+	if ($dd < 49) return '';
+	elseif ($dd > 64) $fec = '02-09';
+	else $fec = $feastend[$dd];
+	
+	if ($shift) {
+		$date = bg_get_new_date ($fec, $year);
+		if ($shift < 0) $date = date('Y-m-d', strtotime($date.' - '.$shift.' days'));
+		elseif ($shift > 0) $date = date('Y-m-d', strtotime($date.' + '.$shift.' days'));
+		$fec = bg_get_old_date ($date, 'm-d');
+	}
+	
+	return $fec;
+}
+
+// Функция возвращает дату Службы Великого канона
+function greateCanon ($year) {
+
+	$gc = bg_get_date_by_rule('0--17', $year);
+	if (in_array($gc[0], bg_get_date_by_rule('03-25;03-26', $year))) $gc = bg_get_date_by_rule('0--19', $year);	// Переносим на Вт
+
+	return bg_get_old_date ($gc[0], 'm-d');
 }

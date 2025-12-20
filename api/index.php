@@ -4,6 +4,10 @@ include_once ('../functions.php');
 include_once ('../readings.php');
 
 $date = bg_currentDate();
+$cur_y = date("Y")+1;
+$cur_y = 2100;
+
+if ($date < '2001-01-01' || $date > $cur_y.'-12-31') exit('Даты ограничены 2001 - '.$cur_y.' годами.');
 
 list($y, $m, $d) = explode('-', $date);
 $y = (int)$y; 
@@ -18,12 +22,14 @@ list($old_y,$old_m,$old_d) = explode ('-', $old);
 $data = array();
 $data = bg_getData($old_y);
 
-$desc_json = '../descriptions.json';
 $descriptions = array();
+
+$desc_json = '../descriptions.json';
 if (file_exists($desc_json)) {
 	$json = file_get_contents($desc_json);
 	$descriptions = json_decode($json, true);
 }
+
 
 $today = $data[$date];
 foreach($today['events'] as $key => $event) {

@@ -98,6 +98,8 @@ function bg_getFood ($date) {
 	list($y, $m, $d) = explode('-', $date);
 	$wd = date("N",strtotime($date));
 	$y = (int) $y;
+	$dd = ($m < 3)?bg_ddif($y-1):bg_ddif($y);
+	if ($d <= $dd && $m == 1) $y -= 1;
 	
 	// Святки
 	if ($date < bg_get_new_date ('01-05', $y)) {								// Продолжение Святок

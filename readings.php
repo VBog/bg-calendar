@@ -72,12 +72,19 @@ function bg_getDayEvents ($year, $events) {
 	$akathist = bg_get_date_by_rule ('0--15', $year);
 	// Страстная седмица
 	$holy_week = bg_get_date_by_rule ('0--6,0--1', $year);
+	// Светлая седмица
+	$bright_week = bg_get_date_by_rule ('0-1,0-6', $year);
 	// Благовещение с предпразднством и отданием
 	$annunciation = bg_get_date_by_rule ('03-24,03-26', $year);
 	// Троица и День Святого Духа
 	$trinity = bg_get_date_by_rule ('0-49,0-50', $year);
 	// День Всех Святых
 	$all_saints = bg_get_date_by_rule ('0-56', $year);
+	// Отдания праздников по Вс
+	$feastends = bg_get_date_by_rule ('7:01-14;08-13;08-23;09-12;09-21;11-25;12-31', $year);
+	// Собор новомучеников 
+	$newmartyrs1 = bg_get_date_by_rule ('7:01-23,01-24;01-26,01-28', $year);
+	$newmartyrs2 = bg_get_date_by_rule ('7:01-22;01-25', $year);
 
 	$transfer_dates = array();
 	$data = array();
@@ -110,71 +117,117 @@ function bg_getDayEvents ($year, $events) {
 					if (in_array($date, $universal_saturday)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = date ('Y-m-d', strtotime($date.'- 2 days'));
-						$data[$newdate]['events'][] = $event;
+						if (!is_array($data[$newdate]['events'])) $data[$newdate]['events'] = array();
+						array_unshift($data[$newdate]['events'], $event);	// В начало
 
 				// В Димитриевскую родительскую субботу праздники переносим на предыдущую Пт
 					} elseif (in_array($date, $dimitry_saturday)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
-						$data[$newdate]['events'][] = $event;
+						if (!is_array($data[$newdate]['events'])) $data[$newdate]['events'] = array();
+						array_unshift($data[$newdate]['events'], $event);	// В начало
+					
+				// В Память новомученников земли Русской праздники переносим на предыдущую Сб
+					} elseif (in_array($date, $newmartyrs1)) {
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
+						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
+						if (!is_array($data[$newdate]['events'])) $data[$newdate]['events'] = array();
+						array_unshift($data[$newdate]['events'], $event);	// В начало
+					
+				// --- но 01-22 и 01-25 на Пн
+					} elseif (in_array($date, $newmartyrs2)) {
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
+						$newdate = date ('Y-m-d', strtotime($date.'+ 1 days'));
+						$data[$newdate]['events'][] = $event;				// В начало
 					
 				// В среду и пятницу сырной седмицы полиелейные праздники меняем на вседневные предыдущего дня
 					} elseif (in_array($date, $wed_fri)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
-						$data[$newdate]['events'][] = $event;
+						if (!is_array($data[$newdate]['events'])) $data[$newdate]['events'] = array();
+						array_unshift($data[$newdate]['events'], $event);	// В начало
 						$transfer_dates[$newdate] = $date;
 
 				// Первые 4 дня Великого поста праздники переносим на следующую Сб
 					} elseif (in_array($date, $lent_start)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = bg_get_new_date ('0--43', $year);
-						$data[$newdate]['events'][] = $event;
+						$data[$newdate]['events'][] = $event;											// В начало
 						$transfer_dates[$newdate] = $date;
 
 				// В Ср 4-й седмицы, то есть в преполовение Великого поста праздники переносим на Вт 4-й седмицы
 					} elseif (in_array($date, $lent_half)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'),  $old);
 						$newdate = bg_get_new_date ('0--26', $year);
-						$data[$newdate]['events'][] = $event;
+						if (!is_array($data[$newdate]['events'])) $data[$newdate]['events'] = array();
+						array_unshift($data[$newdate]['events'], $event);	// В начало
+						$transfer_dates[$newdate] = $date;
+
+				// Во Вт 5-й седмицы — предпразднство Благовещения переносим на Пн 5-й седмицы
+				// В Чт 5-й седмицы — предпразднство Благовещения переносим на Ср 5-й седмицы
+					} elseif (in_array($date, bg_get_date_by_rule ('03-24', $year)) && 
+							in_array($date, bg_get_date_by_rule ('0--19;0--17', $year)) &&
+							$event['subtype'] == 'prefeast') {
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
+						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
+						if (!is_array($data[$newdate]['events'])) $data[$newdate]['events'] = array();
+						array_unshift($data[$newdate]['events'], $event);	// В начало
 						$transfer_dates[$newdate] = $date;
 
 				// В Чт 5-й седмицы — в службу Великого канона праздники переносим на Вт 5-й седмицы
 					} elseif (in_array($date, $grand_canon)) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = bg_get_new_date ('0--19', $year);
-						$data[$newdate]['events'][] = $event;
+						if (!is_array($data[$newdate]['events'])) $data[$newdate]['events'] = array();
+						array_unshift($data[$newdate]['events'], $event);	// В начало
 						$transfer_dates[$newdate] = $date;
 
 				// В субботу Акафиста (Сб 5-й седмицы) праздники переносим на Неделю 5-ю Великого поста
 					} elseif (in_array($date, $akathist) && $event['subtype'] != 'triod') {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
-						$newdate = bg_get_new_date ('0--14', $year);
-						$data[$newdate]['events'][] = $event;
-
-				// В период Благовещения переносим праздники Триоди на повечерие предыдущего дня (Сб)
-					} elseif (in_array($date, $annunciation)&& $event['subtype'] == 'triod') {
-						$event['title'] .= ' '.sprintf(_('(перенос на повечерие с %s ст.ст.)'), $old);
-						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
-						$data[$newdate]['events'][] = $event;
+						$newdate = bg_get_new_date ('0--14', $year);									// В начало			
+						$data[$newdate]['events'][] = $event;			
 
 				// В Троицу и День Святого Духа переносим на Вт троицкой седмицы
 					} elseif (in_array($date, $trinity) && $event['level'] <= 3) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = bg_get_new_date ('0-51', $year);
-						$data[$newdate]['events'][] = $event;
+						$data[$newdate]['events'][] = $event;											// В начало
 						$transfer_dates[$newdate] = $date;
 
 				// В День Всех Святых переносим на Пт троицкой седмицы
 					} elseif (in_array($date, $all_saints) && $event['level'] == 3) {
 						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
 						$newdate = bg_get_new_date ('0-54', $year);
-						$data[$newdate]['events'][] = $event;
+						if (!is_array($data[$newdate]['events'])) $data[$newdate]['events'] = array();
+						array_unshift($data[$newdate]['events'], $event);	// В начало
 						$transfer_dates[$newdate] = $date;
+
+				// В отдания праздников в Неделю переносим полиелей на предыдущий день (Сб)
+					} elseif ((in_array($date, $feastends) || (in_array($date, bg_get_date_by_rule('feastendCandlemas', $year)) && $wd == 7)) && $event['level'] == 3) {
+						$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
+						$newdate = date ('Y-m-d', strtotime($date.'- 1 days'));
+						if (!is_array($data[$newdate]['events'])) $data[$newdate]['events'] = array();
+						array_unshift($data[$newdate]['events'], $event);	// В начало
 
 					} else {
 						$data[$date]['events'][] = $event;
 					}
+
+			// Если Благовещение приходится на Среду или Четверток Великого канона, то Служба Великого канона переносится на Вт 5-й седмицы
+				} elseif (in_array($date, bg_get_date_by_rule ('03-25,03-26', $year)) && in_array($date, $grand_canon) && $event['subtype'] == 'triod') {
+					$event['title'] .= ' '.sprintf(_('(перенос с %s ст.ст.)'), $old);
+					$newdate = bg_get_new_date ('0--19', $year);
+					if (!is_array($data[$newdate]['events'])) $data[$newdate]['events'] = array();
+					array_unshift($data[$newdate]['events'], $event);	// В начало
+					$transfer_dates[$newdate] = $date;
+
+			// Если Служба Великого канона переносена на Вт 5-й седмицы, то других служб нет
+				} elseif (in_array($date, bg_get_date_by_rule ('03-23,03-24', $year)) && in_array($date,bg_get_date_by_rule ('0--19', $year)) && $event['subtype'] == 'event') {
+					
+			// А́ще случи́тся предпра́зднство Благове́щения Пресвяты́я Богоро́дицы в неде́лю 4-ю или́ 5-ю посто́в.
+			// Святы́х же слу́жбы – Иоа́нна Ле́ствичника и Мари́и Еги́птяныни – в сия́ неде́ли оставля́ются и пою́тся, егда́ екклисиа́рх разсу́дит.
+				} elseif (in_array($date, $annunciation)&& $event['subtype'] == 'triod' && $wd == 7) {
 
 				} else {
 					$data[$date]['events'][] = $event;
@@ -201,6 +254,21 @@ function bg_getDayEvents ($year, $events) {
 				}
 			}
 		}
+	}
+/*						
+*/	
+	// Сортируем события дня по приортету
+	foreach ($data as $date => $value) {
+		$priority = array();
+		foreach ($value['events'] as $key => $event) {
+			$priority[intval($event['priority'])][] = $event;
+		}
+		ksort($priority, SORT_NUMERIC);
+		$events = array();
+		foreach($priority as $pr) {
+			$events = array_merge($events, $pr);
+		}
+		$data[$date]['events'] = $events;
 	}
 	
 	// Дополним массив данных по дням дополнительной информацией
@@ -244,28 +312,40 @@ function bg_getDayEvents ($year, $events) {
 				$day_subtype = $event['subtype'];
 		// Есть служба, если она имеет знак Типикона или помечена как вседневная
 			} elseif ($event['level'] < 7) {
-				// 1. Пасха, Страстная седмица, служба Вел. канона, субботы мясопустная и Троицкая - ничего нельзя присоединить, только Благовещение.
-				if (in_array($date, bg_get_date_by_rule('0--57;0--25;0--23;0--17;0--6,0-0;0-48', $year)) && $event['level'] > 0) {
+				// 1. Пасха, Страстная седмица, служба Вел. канона, субботы мясопустная и Троицкая, День Святого Духа, Неделя Богоотец - ничего нельзя присоединить, только Благовещение и отдание.
+				if (in_array($date, bg_get_date_by_rule(['0--57;0--17;0--6,0-0;0-48;0-50','7:12-26,12-31'], $year)) && $event['level'] > 0 && !in_array($date, bg_get_date_by_rule('03-25,03-26', $year)) && $event['subtype'] != 'triod') {
+				
+				// - Ср и Пт 4-й седмицы, только Благовещение.
+				} elseif (in_array($date, bg_get_date_by_rule(['0--25;0--23'], $year)) && $event['level'] > 0 && !in_array($date, bg_get_date_by_rule('03-25', $year)) && $event['subtype'] != 'triod') {
+
+				// В случае Благовещения события Триоди отменяются.
+				} elseif (in_array($date, bg_get_date_by_rule('03-25', $year)) && $event['subtype'] == 'triod') {
+
+				// - предпразднство Благовещения
+				} elseif (!@is_blank($festivity_ind) &&  $festivity_subtype == 'prefeast'&& in_array($date, bg_get_date_by_rule('03-23;03-24', $year))) {
 					
-				// 2. Светлая седмица, Лаз. СБ и Нед. Ваий, Суббота Акафиста - можно присоединить только бдение.
-				// День Всех СВятых
+				// 2. Светлая седмица, Лаз. СБ и Нед. Ваий, Суббота Акафиста, День Всех СВятых - можно присоединить только бдение.
 				} elseif (in_array($date, bg_get_date_by_rule('0--15;0--8,0--7;0-1,0-6;0-56', $year)) && $event['level'] > 2 && $event['subtype'] != 'triod') {
 				
-				// 3. отдания праздников, Недели Триоди, Недели пред и по Р. Х. (включая Неделю праотец), Преполовение Пятидесятницы - можно присоединить полиелей и выше.
-				// Из отданий есть исключения: отдание праздника Введения Богородицы всегда совершается со святыми без знака, 
-				// а также Собор Богородицы по Пн совершается совместно с Неделей Богоотец,
-				// а также отдание Благовещения совместно с Собором арх. Гавриила
-				// Отдания Великих праздников: Рождества и Усекновения главы Иоанна Предтечи, а также Петра и Павла
-				// Для Недель 2-й, 4-й и 5-й нужно будет соответствующие файлы разделить на 2 части: отдельно покаянные службы (только канон и самогласен на "Слава" на хвалитных стихирах)
-				// и отдельно службы святым. Покаянные не отменяются, службы святым - да, отменяются.
-				} elseif((((!empty($festivity) && $festivity['subtype'] == 'feastend' && 
-					!in_array($date, bg_get_date_by_rule(['01-07;06-25;06-30;08-30;11-25', '1:12-26','03-26'], $year))) || 
-					(!empty($special) && $special['subtype'] == 'sunday' && $event['subtype'] != 'triod') ||
-					(in_array($date, bg_get_date_by_rule('0-24', $year)))) && $event['level'] > 4)) {
+				// 3.	Отдания праздников (14 янв., отдание Сретения, отдание Преполовения, Пасхи, Вознесения, Пятидесятницы, 13, 23 авг., 12, 21 сен., 31 дек.), 
+				// 		Недели Триоди, Недели пред и по Р. Х. (включая Неделю праотец), Преполовение Пятидесятницы - можно присоединить только полиелей и выше.
+				//		А также 1-я Сб ВП
+				// 		Исключения:	отдание праздника Введения Богородицы всегда совершается со святыми без знака, 
+				// 					отдания Великих праздников: Рождества и Усекновения главы Иоанна Предтечи, а также Петра и Павла
+				// 					а также Собор Богородицы по Вс и Пн совершается совместно с Неделей по РХ и Богоотец (1,7:12-26),
+				//					а также отдание Благовещения совместно с Собором арх. Гавриила,
+				// 					и в Неделю праотец шестеричная служба прор. Даниила и трех отроков (7:12-17)
+				//	События Триоди не переносим!!!
+				
+				} elseif((in_array($date, bg_get_date_by_rule(['01-14;0-48;0-31;0-38;0-47;0-55;08-13;08-23;09-12;09-21', '1,2,3,4,5,6:12-26', '1,2,3,4,5,6:12-31'], $year)) ||
+						in_array($date, bg_get_date_by_rule('feastendCandlemas', $year)) ||
+						in_array($date, bg_get_date_by_rule(['7:12-11,12-16;12-18,12-24;0--70,0-63', '0-24', '0--43'], $year)))
+					&& ($event['level'] > 3 && $event['subtype'] != 'triod')) {
 				
 				// 4. Напротив, среда и пятница сырной, ПН - ПТ 1-й седмицы - только вседневные святые
 				} elseif (in_array($date, bg_get_date_by_rule('0--53;0--51;0--48,0--44', $year)) && $event['level'] < 5) {
 				
+				// 5. все предпразднства/попразднства, СБ и Нед. пред и по Воздвижении, пред и по Богоявлении, только СБ пред и по РХ, седмичные дни 2-й - 6-й седмиц Поста - можно присоединить все, что угодно, даже две службы.
 				} else $tipicon_events[] = $key;
 			}
 		// Рекомендован повышенный уровень службы
@@ -276,7 +356,8 @@ function bg_getDayEvents ($year, $events) {
 		
 		// Если вселенская родительская суббота или навечерие, или воскресный день в период Триодей
 		// то это главный праздник
-		if (!is_blank($special_ind) && in_array($day_subtype, ['universal_saturday', 'eve', 'sunday'] )) {
+		if (!@is_blank($special_ind) && in_array($day_subtype, ['universal_saturday', 'eve', 'sunday']) 
+				&& !in_array($date, bg_get_date_by_rule('7:12-17;01-01,01-05;01-07,01-13', $year))) {
 			$main_ind = $special_ind;
 			$event = $value['events'][$special_ind];
 			$main_level = $event['level'];
@@ -288,8 +369,22 @@ function bg_getDayEvents ($year, $events) {
 				$icon_title = $event['title'];
 				$icon = $event['imgs'][0];
 			}
-		// Ср и Пт 4-й седмицы (поклонение Кресту), Четверток Великого канона - главный праздник
-		} elseif (in_array($date, $cross_worship) || in_array($date, $grand_canon)) {
+		// Перпразднство Благовещения
+		} elseif (!@is_blank($festivity_ind) &&  $festivity_subtype == 'prefeast'
+				&& in_array($date, bg_get_date_by_rule('03-23;03-24', $year))) {
+			$main_ind = $festivity_ind;
+			$event = $value['events'][$festivity_ind];
+			$main_level = $event['level'];
+			$main_type = $event['type'];
+			$main_subtype = $event['subtype'];
+			$main_feast_type = $event['feast_type'];
+			$main_rank = 0;
+			if (!empty($event['imgs'])) {
+				$icon_title = $event['title'];
+				$icon = $event['imgs'][0];
+			}
+		// Ср и Пт 4-й седмицы (поклонение Кресту)
+		} elseif (in_array($date, $cross_worship)) {
 			$main_ind = $special_ind;
 			$event = $value['events'][$special_ind];
 			$main_level = $event['level'];
@@ -315,11 +410,25 @@ function bg_getDayEvents ($year, $events) {
 				$icon_title = $event['title'];
 				$icon = $event['imgs'][0];
 			}
+
+		// Дни Светлой седмицы - главный праздник
+		} elseif (in_array($date, $bright_week)) {
+			$main_ind = $special_ind;
+			$event = $value['events'][$special_ind];
+			$main_level = $event['level'];
+			$main_type = $event['type'];
+			$main_subtype = $event['subtype'];
+			$main_feast_type = $event['feast_type'];
+			$main_rank = 0;
+			if (!empty($event['imgs'])) {
+				$icon_title = $event['title'];
+				$icon = $event['imgs'][0];
+			}
 						
 		// Отдание считаем главным праздником
 		} elseif ($festivity_ind != '' && $value['events'][$festivity_ind]['subtype'] == 'feastend' &&
-			!in_array($date, bg_get_date_by_rule (['01-07;03-26;06-25;06-30;08-30;11-25','1:12-26'], $year))) {	// Кроме Собора Предтечи, отдания Благовещения, отдания Введения и Собора Богородицы в Пн (с Неделей Богоотец)
-																												// а также Отдания Великих праздников: Рождества и Усекновения главы Иоанна Предтечи, а также Петра и Павла
+			!in_array($date, bg_get_date_by_rule (['01-07;03-26;06-25;06-30;08-30;11-25','7:12-26','7:12-31'], $year))) {	// Кроме Собора Предтечи, отдания Благовещения, отдания Введения и Собора Богородицы в Вс и Пн (с Неделей Богоотец)
+																													// а также Отдания Великих праздников: Рождества и Усекновения главы Иоанна Предтечи, а также Петра и Павла
 			$main_ind = $festivity_ind;
 			$event = $value['events'][$festivity_ind];
 			$main_level = $event['level'];
@@ -351,14 +460,14 @@ function bg_getDayEvents ($year, $events) {
 			
 		}
 		
-		// В случае предпразднства, самого праздника и отдания Благовещения родительские субботы отменяются
+		// В случае предпразднства, самого праздника и отдания Благовещения
 		if ($day_subtype == 'saturday_honor_dead' && in_array($date, $annunciation)) {
 			$day_subtype = '';
 			$title = $value['events'][$special_ind]['title'];
 			$data[$date]['events'][$special_ind]['title'] = substr($title, 0, strpos($title, "."));
 			$data[$date]['events'][$special_ind]['subtype'] = '';
 			$data[$date]['events'][$special_ind]['readings'] = array();
-			if (!is_blank($festivity_ind)) {
+			if (!@is_blank($festivity_ind)) {
 				$main_ind = $festivity_ind;
 				$event = $value['events'][$festivity_ind];
 				$main_level = $event['level'];
@@ -393,7 +502,7 @@ function bg_getDayEvents ($year, $events) {
 		
 	// Второе событие дня (по умолчанию - нет)
 		$second_ind = '';
-		if (!is_blank($main_ind) && $value['events'][$main_ind]['dual_worship'] > 0) {	// Двойной праздник
+		if (!@is_blank($main_ind) && $value['events'][$main_ind]['dual_worship'] > 0) {	// Двойной праздник
 			foreach ($value['events'] as $key => $event) {
 				// Одинаковый номер пары и другой id 
 				if ($event['dual_worship'] == $value['events'][$main_ind]['dual_worship'] && $key != $main_ind) {
@@ -407,9 +516,9 @@ function bg_getDayEvents ($year, $events) {
 				}
 			}
 		}
-		// В попразднство в Неделю совмещение служб отменяется
+/*		// В попразднство в Неделю совмещение служб отменяется
 		// а также в родительские субботы
-		if (($wd == 7 && !is_blank($festivity_ind)) || $day_subtype == 'saturday_honor_dead') {
+		if (($wd == 7 && !@is_blank($festivity_ind)) || $day_subtype == 'saturday_honor_dead') {
 			foreach ($value['events'] as $key => $event) {
 				if ($event['dual_worship'] > 0) {
 					$data[$date]['events'][$key]['dual_worship'] = 0;
@@ -417,7 +526,7 @@ function bg_getDayEvents ($year, $events) {
 			}
 			$second_ind = '';
 		} 
-		
+*/		
 		
 		// Если у главного праздника нет иконы, то найдем первую в списке
 		if (empty($icon)) {
@@ -492,8 +601,10 @@ function bg_getDayEvents ($year, $events) {
 		list($y, $m, $d) = explode('-', $date);
 		$wd = date("N",strtotime($date));
 		
-		// Господские недвунадесятые праздники: Изнесение Древ, Новолетие, Трясения
-		$lord_feasts = bg_get_date_by_rule ('08-01;09-01;10-26', $y);
+		// Новолетие
+		$newyear = bg_get_date_by_rule ('09-01', $y);
+		// Обновление Храма Гроба Господня
+		$renovation = bg_get_date_by_rule ('09-13', $y);
 
 		$tomorrow = date ('Y-m-d', strtotime($date.'+ 1 days'));
 		$wd_t = date("N",strtotime($tomorrow));
@@ -503,12 +614,13 @@ function bg_getDayEvents ($year, $events) {
 		$wd_by = date("N",strtotime($before_yesterday));
 		
 		$or = new OrderedReadings();
-		if (($data[$date]['festivity_subtype'] != 'afterfeast') &&								// НЕ попразднство
-			$date < bg_get_new_date ('0--48', $y) || bg_get_new_date ('0-49', $y) < $date ) { 	// Только в период Октоиха 
+		if (($data[$date]['festivity_subtype'] != 'afterfeast' || 									// НЕ попразднство, 
+			($data[$date]['day_type'] == 'weekend' && $data[$date]['day_subtype'] == 'sunday')) &&	// кроме Недель по РХ и Богоявлению
+			($date < bg_get_new_date ('0--48', $y) || bg_get_new_date ('0-49', $y) < $date) ) { 	// Только в период Октоиха 
 																									// Если сегодня:
 			if (!($data[$date]['main_level'] == 0 && $data[$date]['main_feast_type'] == '1') && 	// НЕ господский в любой день,
 				!($data[$date]['main_level'] <= 2 && $wd < 7) &&									// НЕ Великий и Бденный в будни,
-				!(in_array($date, $lord_feasts)  && $wd < 7) &&										// НЕ Изнесение Древ, Новолетие, Трясения в будни,
+				!(in_array($date, $newyear)  && $wd < 7) &&											// НЕ Новолетие в будни,
 				$data[$date]['main_type'] != 'eve') {												// НЕ Навечерие
 
 			// Проверяем переносы рядовых чтений на сегодня
@@ -518,7 +630,7 @@ function bg_getDayEvents ($year, $events) {
 				if (!empty($data[$yesterday]) && 															// Вчера: 
 					(($data[$yesterday]['main_level'] == 0 && $data[$yesterday]['main_feast_type'] == '1') || 	// Господский,
 						($data[$yesterday]['main_level'] <= 2 && $wd_y < 7) ||									// или Великий и Бденный в будни
-						(in_array($yesterday, $lord_feasts)  && $wd_y < 7) ||									// или Изнесение Древ, Новолетие, Трясения в будни,
+						(in_array($yesterday, $newyear)  && $wd_y < 7) ||										// или Новолетие в будни,
 						$data[$yesterday]['main_type'] == 'eve') &&												// или Навечерие
 
 					($wd == 2 || 																				// и сегодня Вторник
@@ -526,7 +638,7 @@ function bg_getDayEvents ($year, $events) {
 					!empty($data[$before_yesterday]) && 																// и позавчера: 
 					(($data[$before_yesterday]['main_level'] == 0 && $data[$before_yesterday]['main_feast_type'] == '1') || // Господский,
 						($data[$before_yesterday]['main_level'] <= 2 && $wd_by < 7) ||										// или Великий или Бденный в будни
-						(in_array($before_yesterday, $lord_feasts) && $wd_by < 7) ||										// или Изнесение Древ, Новолетие, Трясения в будни,
+						(in_array($before_yesterday, $newyear) && $wd_by < 7) ||										// или Новолетие в будни,
 						$data[$before_yesterday]['main_type'] == 'eve')))) {												// или Навечерие
 				
 					$readings[] = (array) $or->bg_day_readings ($yesterday, $wd_name[$wd_y-1]);
@@ -534,8 +646,8 @@ function bg_getDayEvents ($year, $events) {
 
 				// Рядовые чтений на сегодня
 				$ordinary = (array) $or->bg_day_readings ($date, _("рядовое"));
-				if ($data[$date]['day_type'] == 'weekend' &&
-					in_array($data[$date]['day_subtype'], ['sunday_before', 'sunday_after'])) { 
+				if (($data[$date]['day_type'] == 'weekend' && $data[$date]['day_subtype'] == 'sunday') ||		
+					(in_array($date, $renovation) && in_array($wd, [4,6]))) { 
 					$ordinary['apostle'] = '';
 					$ordinary['gospel'] = '';
 				}
@@ -547,7 +659,8 @@ function bg_getDayEvents ($year, $events) {
 				if ($wd < 6 && !empty($data[$tomorrow]) && 															// Завтра:
 					(($data[$tomorrow]['main_level'] == 0 && $data[$tomorrow]['main_feast_type'] == '1') || 		// Господский,
 						($data[$tomorrow]['main_level'] <= 2 && $wd_t < 7) ||										// или Великий или Бденный в будни
-						(in_array($tomorrow, $lord_feasts) && $wd_t < 7) ||											// или Изнесение Древ, Новолетие, Трясения
+						(in_array($tomorrow, $newyear) && $wd_t < 7) ||												// или Новолетие
+						(in_array($tomorrow, $renovation) && in_array($wd_t, [4,6])) ||								// или Обновление в Чт и Сб
 						$data[$tomorrow]['main_type'] == 'eve')) {													// или Навечерие
 					
 					$readings[] = (array) $or->bg_day_readings ($tomorrow, $wd_name[$wd_t-1]);
@@ -561,13 +674,14 @@ function bg_getDayEvents ($year, $events) {
 
 			} else $readings = array();																				// ИНАЧЕ рядовые чтения отменяются
 			
-		} else $readings[] = (array) $or->bg_day_readings ($date, '');
+		} else $readings[] = (array) $or->bg_day_readings ($date, _("рядовое"));
 		
-		if ($date == bg_get_new_date ('01-07', $y) || 			// В Собор Богородицы
-			$date == bg_get_new_date ('12-26', $y)) 			// и в Собор Предтечи 
+		if ($wd < 7 &&									// По будням
+			($date == bg_get_new_date ('12-26', $y-1) || 		// В Собор Богородицы
+			 $date == bg_get_new_date ('01-07', $y))) 			// и в Собор Предтечи 
 				$data[$date]['ordinary_readings'] = array();	// рядовые чтения отменяются
-
-		else $data[$date]['ordinary_readings'] = $readings;		// Рядовые чтения
+		else 
+			$data[$date]['ordinary_readings'] = $readings;		// Рядовые чтения
 		$data[$date] = array_slice($data[$date], 1, count($data[$date])-1, true) + array('events' => $data[$date]['events']);
 		
 	}
@@ -603,8 +717,13 @@ function is_grigoriy_dvoeslov ($date, $polyeles=false) {
 	
 	list ($year, $m, $d) = explode ('-', $date);
 	
+	// Четверток Великого канона
+	$great_canon = bg_get_date_by_rule('0--17', $year);
+	if (in_array($great_canon[0], bg_get_date_by_rule('03-25;03-26', $year))) $great_canon = bg_get_date_by_rule('0--19', $year);	// Переносим на Вт
+	
+	
 	$date_array = array_merge (	bg_get_date_by_rule('3,5:0--48,0--9', $year),	// Ср и Пт Четыредесятницы
-								bg_get_date_by_rule('0--17', $year),			// Чт 5-ой седмицы, Мариинино стояние
+								$great_canon,									// Чт (Вт) 5-ой седмицы, Мариинино стояние
 								bg_get_date_by_rule('0--6,0--4', $year) );		// с Пн по Ср Страстной седмицы
 	
 	if (in_array($date, bg_get_date_by_rule('03-25', $year)))  return false;							// Благовещение 

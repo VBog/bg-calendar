@@ -80,6 +80,11 @@
 		border-radius: 5px;
 		border: 1px solid #aaa;
 		margin-bottom: 3px;
+		height: 1.5em;
+		font-size: 1.2em;
+ 	}
+	input#bg_worships {
+		width: 100%;
 	}
 	hr {
 		margin:0;
@@ -115,6 +120,7 @@
 	#scroll-right {
 		display: inline-block;
 		height: 270px;  
+		width: calc(50% - 135px);
 		text-align: center;
 		font-weight: bold;
 		color: darkred;
@@ -124,7 +130,6 @@
 	}
 	#scroll-left div,
 	#scroll-right div {
-		width: 20px;
 		text-align: center;
 		line-height: 270px;
 	}
@@ -248,7 +253,7 @@ if (file_exists($desc_json)) {
 		</pre>
 	</details>
 	
-	<div class="calendar">
+	<div id="calendar" class="calendar">
 	<!-- Икона дня -->
 		<div class="slider">
 		<div id="scroll-left"><div> < </div></div>
@@ -432,8 +437,8 @@ for ($i=1; $i<6; $i++) {
 	</div>
 <!-- Завершение страницы -->	
 <div class="footer">
-	<hr>
-	<p>Версия 3.13 от 01.08.2024</p>
+	<input id="bg_worships" type="button" value="<?php echo _("Богослужения"); ?>">
+	<p>Версия 3.14 от 06.12.2025</p>
 </div>	
 </section>
 </div>
@@ -464,6 +469,10 @@ for ($i=1; $i<6; $i++) {
 		setParam(true);
 	}, false);
 
+	// Перейти на сайт Богослужения сегодня на текущую дату
+	var bg_worships = document.getElementById("bg_worships");
+	if (bg_worships) bg_worships.addEventListener('click',  () => setParam(true, 'https://azbyka.ru/worships'), false);
+
 	// Очистить div с текстом Жития
 	var bg_hide_block1 = document.getElementById("bg_hide_block1");
 	if (bg_hide_block1) bg_hide_block1.addEventListener('click', function() {
@@ -476,10 +485,11 @@ for ($i=1; $i<6; $i++) {
 		document.getElementById("bg_bible_text").innerHTML='';
 	}, false);
 	
-	function setParam (param=true) {
-		var url=location.href;
-		url=url.substring(0, url.indexOf('?')); 
-		
+	function setParam (param=true, url='') {
+		if (!url) {
+			var url=location.href;
+			url=url.substring(0, url.indexOf('?')); 
+		}
 		if (param) {
 			var d = document.getElementById("bg_setDay");
 			url = url+'?date='+d.value;
@@ -535,13 +545,84 @@ for ($i=1; $i<6; $i++) {
 	
 	var button_left = document.getElementById("scroll-left");
 	var button_right = document.getElementById("scroll-right");
+	var icon = document.getElementById("icon-pics");
+	var icon_width = icon.scrollWidth - 250;
+	if (icon.scrollLeft >= icon_width) button_left.style.opacity = 0;
+	else button_left.style.opacity = 1;
+	if (icon.scrollLeft <= 0) button_right.style.opacity = 0;
+	else button_right.style.opacity = 1;
 
+	
 	button_left.onclick = () => {
-	  document.getElementById("icon-pics").scrollLeft += 256;
+		icon.scrollLeft += 256;
+		if (icon.scrollLeft+256 >= icon_width) button_left.style.opacity = 0;
+		else button_left.style.opacity = 1;
+		if (icon.scrollLeft+256 <= 0) button_right.style.opacity = 0;
+		else button_right.style.opacity = 1;
 	};
 	button_right.onclick = () => {
-	  document.getElementById("icon-pics").scrollLeft -= 256;
+		icon.scrollLeft -= 256;
+		var scroll_left = icon.scrollLeft;
+		if (icon.scrollLeft-256 >= icon_width) button_left.style.opacity = 0;
+		else button_left.style.opacity = 1;
+		if (icon.scrollLeft-256 <= 0) button_right.style.opacity = 0;
+		else button_right.style.opacity = 1;
 	};
+
+/******************************************************************************
+
+	Действия на телефоне:
+		Сдвиг экрана - переход на другую дату
+		Двойной тап - возврат на сегодня
+	
+*******************************************************************************/
+	var startX;
+	var element = document.getElementById('calendar');
+	var lastTouchEnd = 0;
+
+	element.addEventListener('touchstart', (e) => {
+		startX = e.touches[0].clientX; // Начальная X координата
+	});
+
+	element.addEventListener('touchmove', (e) => {
+		var currentX = e.touches[0].clientX;
+		var deltaX = currentX - startX;
+		// Можно двигать элемент:
+		element.style.transform = `translateX(${deltaX}px)`;
+	});
+
+	element.addEventListener('touchend', (e) => {
+		var endX = e.changedTouches[0].clientX;
+		var deltaX = endX - startX;
+
+		if (deltaX < -50) { // Свайп влево (отрицательное смещение)
+			element.style.transform = 'translateX(-100%)'; // Скрыть элемент влево
+			var date = new Date(document.getElementById("bg_setDay").value);
+			date.setDate(date.getDate() + 1);
+			document.getElementById("bg_setDay").value = date.getFullYear()+"-"+(("0" + (date.getMonth() + 1)).slice(-2))+"-"+(("0" + date.getDate()).slice(-2));
+			setParam(true);
+		} else if (deltaX > 50) { // Свайп вправо
+			element.style.transform = 'translateX(+100%)'; // Скрыть элемент вправо
+			var date = new Date(document.getElementById("bg_setDay").value);
+			date.setDate(date.getDate() - 1);
+			document.getElementById("bg_setDay").value = date.getFullYear()+"-"+(("0" + (date.getMonth() + 1)).slice(-2))+"-"+(("0" + date.getDate()).slice(-2));
+			setParam(true);
+		} else {
+			// Возврат в исходное положение, если свайп короткий
+			element.style.transform = 'translateX(0)';
+		}
+		
+		// Двойной тап - возврат на сегодня
+		const now = Date.now();
+		// Если разница между текущим и предыдущим событием меньше,
+		// например, 300ms, то это двойной тап
+		if (now - lastTouchEnd < 300) {
+			e.preventDefault(); // Предотвратить прокрутку, если нужно
+			setParam(false);
+		}
+		lastTouchEnd = now;
+	});
+
 </script>
 </body>
 </html>
