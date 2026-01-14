@@ -646,7 +646,10 @@ function bg_getDayEvents ($year, $events) {
 
 				// Рядовые чтений на сегодня
 				$ordinary = (array) $or->bg_day_readings ($date, _("рядовое"));
-				if (($data[$date]['day_type'] == 'weekend' && $data[$date]['day_subtype'] == 'sunday') ||		
+				// Рядовые чтений отменяются: 
+				//  - в Недели пред РХ (отцов и праотцов)
+				if (($data[$date]['day_type'] == 'weekend' && $data[$date]['day_subtype'] == 'sunday') ||	
+				//  - по Чт и Сб в день  Обновления Храма Гроба Господня
 					(in_array($date, $renovation) && in_array($wd, [4,6]))) { 
 					$ordinary['apostle'] = '';
 					$ordinary['gospel'] = '';

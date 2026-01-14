@@ -438,7 +438,7 @@ for ($i=1; $i<6; $i++) {
 <!-- Завершение страницы -->	
 <div class="footer">
 	<input id="bg_worships" type="button" value="<?php echo _("Богослужения"); ?>">
-	<p>Версия 3.14 от 06.12.2025</p>
+	<p>Версия 3.15 от 14.01.2026</p>
 </div>	
 </section>
 </div>

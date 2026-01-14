@@ -16,10 +16,12 @@ function bg_sedmica ($date) {
 	// Кол-во дней до(-) / после(+) Пасхи
 	$cd = bg_date_easter_dif($date, (int)$y);
 	
+	if ($cd == -77) $zkhey = _(", о Закхее");
+	else $zkhey =  '';
 	if ($cd < -70) {				// До Недели о мытаре и фарисее идут седмицы по Пятидесятнице прошлого года
 		$cd = bg_date_easter_dif($date, $y-1);
 		$week_number = (int)($cd/7) - 7;
-		if ($wd == 7) return sprintf(_("Неделя %d-я по Пятидесятнице"), $week_number);
+		if ($wd == 7) return sprintf(_("Неделя %d-я по Пятидесятнице") . $zkhey, $week_number);
 		else return sprintf(_("Седмица %d-я по Пятидесятнице"), $week_number+1);
 	}
 	elseif ($cd == -70) return _("Неделя о мытаре и фарисее");	// Седмицы подготовительные
